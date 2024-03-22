@@ -4,10 +4,61 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class PersistentListTest {
+
+    @Test
+    void testEquality() {
+        PersistentList<String> plist1 = new PersistentList<>("A", "B", "C");
+        List<String> list = List.of("A", "B", "C");
+        PersistentList<String> plist2 = new PersistentList<>(list);
+        TransientList<String> tlist = new TransientList<>(list);
+        assertEquals(plist1, plist2);
+        assertEquals(plist1, list);
+        assertEquals(list, plist1);
+        assertEquals(plist1, tlist);
+        assertEquals(tlist, plist1);
+        assertEquals(plist1.hashCode(), plist2.hashCode());
+        assertEquals(plist1.hashCode(), list.hashCode());
+        assertEquals(list.hashCode(), plist1.hashCode());
+        //assertEquals(plist1.hashCode(), tlist.hashCode());
+        //assertEquals(tlist.hashCode(), plist1.hashCode());
+    }
+
+    @Test
+    void testNonEqualityObj() {
+        PersistentList<String> plist1 = new PersistentList<>("A", "B", "C");
+        assertNotEquals("not a List", plist1);
+        assertNotEquals(plist1, "not a List");
+    }
+
+    @Test
+    void testNonEqualityDifferentSize() {
+        PersistentList<String> plist1 = new PersistentList<>("A", "B", "C");
+        List<String> list = List.of("A", "B", "C", "D");
+        PersistentList<String> plist2 = new PersistentList<>(list);
+        TransientList<String> tlist = new TransientList<>(list);
+        assertNotEquals(plist1, plist2);
+        assertNotEquals(plist1, list);
+        assertNotEquals(list, plist1);
+        assertNotEquals(plist1, tlist);
+        assertNotEquals(tlist, plist1);
+    }
+
+    @Test
+    void testNonEqualitySameSize() {
+        PersistentList<String> plist1 = new PersistentList<>("A", "B", "C");
+        List<String> list = List.of("A", "D", "C");
+        PersistentList<String> plist2 = new PersistentList<>(list);
+        TransientList<String> tlist = new TransientList<>(list);
+        assertNotEquals(plist1, plist2);
+        assertNotEquals(plist1, list);
+        assertNotEquals(list, plist1);
+        assertNotEquals(plist1, tlist);
+        assertNotEquals(tlist, plist1);
+    }
 
     @Test
     void testChangeList() {
