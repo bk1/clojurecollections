@@ -1,12 +1,17 @@
 package net.itsky.java.sort;
 
-import java.util.*;
+import java.security.SecureRandom;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+import java.util.Stack;
 
-public class QuickSort<T, L extends List<T>> implements Sort<T, L> {
+public class RandomPivotQuickSort<T, L extends List<T>> implements Sort<T, L> {
 
     private static record Pair(int lower, int upper) {
     }
 
+    private static final Random rand = new SecureRandom();
     @Override
     public L sort(L list, Comparator<T> comparator, Swapper<T, L> swapper) {
         int n = list.size();
@@ -20,7 +25,9 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L> {
                 break;
             }
 
-            T t = list.get(u-1);
+            int idx = rand.nextInt(u-l) + l;
+            T t = list.get(idx);
+            list = swapper.swap(list, u-1, idx);
             int i = l;
             var j = u-2;
             while (i < j) {

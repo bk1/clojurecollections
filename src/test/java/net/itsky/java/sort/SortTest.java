@@ -1,24 +1,23 @@
 package net.itsky.java.sort;
 
-import clojure.lang.IFn;
 import net.itsky.java.clojurecollections.PersistentList;
 import net.itsky.java.clojurecollections.TransientList;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SortTest {
 
     private static final List<String> UNSORTED = List.of("FL8YPS", "6DSNQQ", "U419AB", "X82QVN", "CU25H4", "ZZCRWY");
-    private static final List<String> SORTED = new ArrayList<>(UNSORTED);;
+    private static final List<String> SORTED = new ArrayList<>(UNSORTED);
+    ;
 
-    private static final List<String> LONG_UNSORTED = List.of("0H9Y41BL8WUQ", "7WPFZU00FHJQ", "D0OBE9SD6DPE", "AGBYG6MMCC9B", "E9SPYKWAITU9", "1VT6J5VSDMX9", "WSW1YJI40W8H", "378PPNCN6OW8", "JL819RD3CFTS", "C2YGBBGXXCBV", "KAGQZ7DY82WS", "C6N3W0RU4N5M", "XSJ9V3MN73TA", "8OPVKYG8JHYA", "UN0P5TKDEA05", "XP0KKYPUSTSF", "JS308V9PAJ2Z", "09NYKUUCTM5U", "AFID27K03CXA", "EPS16MESPLM7", "4FSSP0UJB6Q6", "FJG8FS1F2QXB", "L06RQWNPRFLJ", "TW9GAH01TK02", "2BSNA7IBHTRH", "H7IQKOMZ388X", "Y4B7SEEE5QMP", "C22P8R9UBPS7", "KVJE98AOILZ8", "LJLDM4AEA0AD", "1EVSCZGQ55MV", "E1LN8FRI5VNQ", "32NYE2DD9MBO", "OCKJPM3NKQ7P", "0IFOJ8OAY4H9", "5ERNL1PBOKOC", "76I2GY4KQOXP", "8EKLG4FQFU8K", "VP0J12B839EU", "94D3IKF9BITJ" );
+    private static final List<String> LONG_UNSORTED = List.of("0H9Y41BL8WUQ", "7WPFZU00FHJQ", "D0OBE9SD6DPE", "AGBYG6MMCC9B", "E9SPYKWAITU9", "1VT6J5VSDMX9", "WSW1YJI40W8H", "378PPNCN6OW8", "JL819RD3CFTS", "C2YGBBGXXCBV", "KAGQZ7DY82WS", "C6N3W0RU4N5M", "XSJ9V3MN73TA", "8OPVKYG8JHYA", "UN0P5TKDEA05", "XP0KKYPUSTSF", "JS308V9PAJ2Z", "09NYKUUCTM5U", "AFID27K03CXA", "EPS16MESPLM7", "4FSSP0UJB6Q6", "FJG8FS1F2QXB", "L06RQWNPRFLJ", "TW9GAH01TK02", "2BSNA7IBHTRH", "H7IQKOMZ388X", "Y4B7SEEE5QMP", "C22P8R9UBPS7", "KVJE98AOILZ8", "LJLDM4AEA0AD", "1EVSCZGQ55MV", "E1LN8FRI5VNQ", "32NYE2DD9MBO", "OCKJPM3NKQ7P", "0IFOJ8OAY4H9", "5ERNL1PBOKOC", "76I2GY4KQOXP", "8EKLG4FQFU8K", "VP0J12B839EU", "94D3IKF9BITJ");
     private static final List<String> LONG_SORTED = new ArrayList<>(LONG_UNSORTED);
 
     static {
@@ -38,7 +37,7 @@ public class SortTest {
                     }
                 }
                 for (int k = i; k > j; k--) {
-                    list = swapper.swap(list, k, k-1);
+                    list = swapper.swap(list, k, k - 1);
                 }
             }
             return list;
@@ -85,7 +84,7 @@ public class SortTest {
 
     private <T, L extends List<T>> L bubbleSort(L list, Comparator<T> comparator, Swapper<T, L> swapper) {
         int n = list.size();
-        for (int i = n-1; i > 0; i--) {
+        for (int i = n - 1; i > 0; i--) {
             for (int j = 0; j < i; j++) {
                 if (comparator.compare(list.get(j), list.get(j + 1)) > 0) {
                     list = swapper.swap(list, j, j + 1);
@@ -169,6 +168,146 @@ public class SortTest {
         Sort<String, TransientList<String>> tlistSort = new QuickSort<>();
         TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), new TransientListSwapper<String>());
         assertEquals(LONG_SORTED, sortedT);
+    }
+
+
+    @Test
+    void testHeapSort() {
+        List<String> unsortedList = new ArrayList<>(UNSORTED);
+        PersistentList<String> unsortedP = new PersistentList<>(UNSORTED);
+        TransientList<String> unsortedT = new TransientList<>(UNSORTED);
+
+        Sort<String, List<String>> listSort = new HeapSort<>();
+        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), new ListSwapper<>());
+        assertEquals(SORTED, sortedList);
+
+        Sort<String, PersistentList<String>> plistSort = new HeapSort<>();
+        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), new PersistentListSwapper<String>());
+        assertEquals(SORTED, sortedP);
+
+        Sort<String, TransientList<String>> tlistSort = new HeapSort<>();
+        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), new TransientListSwapper<String>());
+        assertEquals(SORTED, sortedT);
+    }
+
+    @Test
+    void testHeapSortLong() {
+        List<String> unsortedList = new ArrayList<>(LONG_UNSORTED);
+        PersistentList<String> unsortedP = new PersistentList<>(LONG_UNSORTED);
+        TransientList<String> unsortedT = new TransientList<>(LONG_UNSORTED);
+
+        Sort<String, List<String>> listSort = new HeapSort<>();
+        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), new ListSwapper<>());
+        assertEquals(LONG_SORTED, sortedList);
+
+        Sort<String, PersistentList<String>> plistSort = new HeapSort<>();
+        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), new PersistentListSwapper<String>());
+        assertEquals(LONG_SORTED, sortedP);
+
+        Sort<String, TransientList<String>> tlistSort = new HeapSort<>();
+        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), new TransientListSwapper<String>());
+        assertEquals(LONG_SORTED, sortedT);
+    }
+
+    @Test
+    void testTernaryHeapSort() {
+        List<String> unsortedList = new ArrayList<>(UNSORTED);
+        PersistentList<String> unsortedP = new PersistentList<>(UNSORTED);
+        TransientList<String> unsortedT = new TransientList<>(UNSORTED);
+
+        Sort<String, List<String>> listSort = new TerneryHeapSort<>();
+        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), new ListSwapper<>());
+        assertEquals(SORTED, sortedList);
+
+        Sort<String, PersistentList<String>> plistSort = new TerneryHeapSort<>();
+        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), new PersistentListSwapper<String>());
+        assertEquals(SORTED, sortedP);
+
+        Sort<String, TransientList<String>> tlistSort = new TerneryHeapSort<>();
+        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), new TransientListSwapper<String>());
+        assertEquals(SORTED, sortedT);
+    }
+
+    @Test
+    void testTernaryHeapSortLong() {
+        List<String> unsortedList = new ArrayList<>(LONG_UNSORTED);
+        PersistentList<String> unsortedP = new PersistentList<>(LONG_UNSORTED);
+        TransientList<String> unsortedT = new TransientList<>(LONG_UNSORTED);
+
+        Sort<String, List<String>> listSort = new TerneryHeapSort<>();
+        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), new ListSwapper<>());
+        assertEquals(LONG_SORTED, sortedList);
+
+        Sort<String, PersistentList<String>> plistSort = new TerneryHeapSort<>();
+        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), new PersistentListSwapper<String>());
+        assertEquals(LONG_SORTED, sortedP);
+
+        Sort<String, TransientList<String>> tlistSort = new TerneryHeapSort<>();
+        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), new TransientListSwapper<String>());
+        assertEquals(LONG_SORTED, sortedT);
+    }
+
+    @Test
+    void testParentChild() {
+        HeapSort<String, List<String>> heapSort = new HeapSort<>();
+        for (int i = 0; i < 1000; i++) {
+            int parent = i;
+            int left = heapSort.leftChild(parent);
+            int right = heapSort.rightChild(parent);
+            assertTrue(parent < left);
+            assertTrue(left < right);
+            assertEquals(right, left + 1);
+            assertEquals(parent, heapSort.parent(left));
+            assertEquals(parent, heapSort.parent(right));
+        }
+        assertEquals(heapSort.parent(1), 0);
+        assertEquals(heapSort.parent(2), 0);
+        assertEquals(heapSort.parent(3), 1);
+        assertEquals(heapSort.parent(4), 1);
+        assertEquals(heapSort.parent(5), 2);
+        assertEquals(heapSort.parent(6), 2);
+
+        Set<Integer> set = IntStream.range(0, 1000).flatMap(i -> IntStream.of(heapSort.leftChild(i), heapSort.rightChild(i))).boxed().collect(Collectors.toSet());
+        assertEquals(2000, set.size());
+    }
+
+    @Test
+    void testHeapify() {
+        List<List<String>> lists = List.of(new ArrayList<>(UNSORTED),
+                new ArrayList<>(SORTED),
+                new ArrayList<>(LONG_UNSORTED),
+                new ArrayList<>(LONG_SORTED));
+        HeapSort<String, List<String>> heapSort = new HeapSort<>();
+        for (List<String> list : lists) {
+            list = heapSort.heapify(list, list.size(), Comparator.naturalOrder(), new ListSwapper<>());
+            for (int i = 0; i < list.size(); i++) {
+                int parent = i;
+                int left = heapSort.leftChild(parent);
+                int right = heapSort.rightChild(parent);
+                String parentStr = list.get(parent);
+                if (left < list.size()) {
+                    String leftStr = list.get(left);
+                    assertTrue(parentStr.compareTo(leftStr) >= 0, "parent=" + parent + " left=" + left + " right=" + right + " parentStr=" + parentStr + " leftStr=" + leftStr + " list=" + list);
+                }
+                if (right < list.size()) {
+                    String rightStr = list.get(right);
+                    assertTrue(parentStr.compareTo(rightStr) >= 0, "parent=" + parent + " left=" + left + " right=" + right + " parentStr=" + parentStr + " rightStr=" + rightStr + " list=" + list);
+                }
+            }
+        }
+    }
+
+    @Test
+    void testSiftDown() {
+        HeapSort<String, List<String>> heapSort = new HeapSort<>();
+        List<String> orig = LONG_UNSORTED;
+        for (int i = 0; i < orig.size(); i++) {
+            List<String> list = new ArrayList<>(orig);
+            heapSort.siftDown(list, 0, i, Comparator.naturalOrder(), new ListSwapper<>());
+            for (int j = i + 1; j < list.size(); j++) {
+                assertEquals(orig.get(j), list.get(j), "i=" + i + " j=" + j + " list=" + list);
+            }
+        }
     }
 
 }

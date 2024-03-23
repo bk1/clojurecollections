@@ -16,4 +16,8 @@ public class PersistentListSwapper<T> implements Swapper<T, PersistentList<T>> {
             return list;
         }
     }
+
+    public static <T> PersistentListSwapper<T> instance() {
+        return new PersistentListSwapper<T>();
+    }
 }
