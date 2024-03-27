@@ -31,13 +31,12 @@ public class Analyze {
         MutableIntLongMap doubleMap = factory.empty();
         for (String line : lines) {
             line += "\n";
-            int prevChar = BEGIN;
-            line.chars().forEach(c -> {
+            line.chars().reduce(BEGIN, (prevChar, c) -> {
                 if (singleMap.containsKey(prevChar)) {
                     int key = prevChar * FACTOR + c;
                     doubleMap.put(key, M+doubleMap.getIfAbsent(key, C));
                 }
-
+                return c;
             });
         }
         for (int i : singleMap.keySet().toArray()) {
