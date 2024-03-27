@@ -10,8 +10,25 @@ public class InsertionSort<T, L extends List<T>> implements Sort<T, L> {
         int n = list.size();
         for (int i = 0; i < n; i++) {
             T t = list.get(i);
-            int j = 0;
+            int j;
             for (j = 0; j < i; j++) {
+                if (comparator.compare(list.get(j), list.get(i)) >= 0) {
+                    break;
+                }
+            }
+            for (int k = i; k > j; k--) {
+                list = swapper.swap(list, k, k - 1);
+            }
+        }
+        return list;
+    }
+
+    public L sortSublist(L list, int lower, int upper, Comparator<T> comparator, Swapper<T, L> swapper) {
+        int n = upper - lower;
+        for (int i = lower; i < upper; i++) {
+            T t = list.get(i);
+            int j;
+            for (j = lower; j < i; j++) {
                 if (comparator.compare(list.get(j), list.get(i)) >= 0) {
                     break;
                 }

@@ -18,7 +18,7 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L> {
     private final Random random;
 
     public QuickSort() {
-        this(PivotStyle.MEDIAN5);
+        this(PivotStyle.MEDIAN3);
     }
 
     public QuickSort(PivotStyle pivotStyle) {
@@ -63,7 +63,7 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L> {
                 result = random.nextInt(u - l) + l;
                 break;
             case MEDIAN3:
-                if (len < 12) {
+                if (len < 20) {
                     result = u - 1;
                 } else {
                     List<Integer> indices = sortElementWithIdx2.sort(Arrays.asList(l, l + (len - 1) / 2, u - 1), idxComparator(list, comparator), swapInt);
@@ -71,7 +71,7 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L> {
                 }
                 break;
             case MEDIAN5:
-                if (len < 12) {
+                if (len < 20) {
                     result = u - 1;
                 } else if (len < 100) {
                     List<Integer> indices = sortElementWithIdx2.sort(Arrays.asList(l, l + (len - 1) / 2, u - 1), idxComparator(list, comparator), swapInt);
@@ -94,6 +94,7 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L> {
         L list = listParam;
         int n = list.size();
         Stack<Pair> tasks = new Stack<>();
+        InsertionSort<T, L> insertionSort = new InsertionSort<>();
         tasks.push(new Pair(0, n));
         while (!tasks.isEmpty()) {
             Pair limits = tasks.pop();
@@ -101,7 +102,11 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L> {
             int u = limits.upper;
             if (u - l <= 1) {
                 // one element -> already sorted
-                break;
+                continue;
+            }
+            if (u - l <= 8) {
+                list = insertionSort.sortSublist(list, l, u, comparator, swapper);
+                continue;
             }
             int idx = getPivot(list, l, u, comparator);
             T t = list.get(idx);
@@ -151,11 +156,30 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L> {
                     }
                 }
             }
-            if (l < split - 1) {
-                tasks.push(new Pair(l, split));
+            boolean lowerAtLeastTwo = l < split -1;
+            boolean upperAtLastTwo = split+2 < u;
+            Pair lowerPair = null;
+            Pair upperPair = null;
+            if (lowerAtLeastTwo) {
+                lowerPair = new Pair(l, split);
             }
-            if (split + 2 < u) {
-                tasks.push(new Pair(split + 1, u));
+            if (upperAtLastTwo) {
+                upperPair = new Pair(split + 1, u);
+            }
+            if (upperAtLastTwo || lowerAtLeastTwo) {
+                if (! lowerAtLeastTwo) {
+                    tasks.push(upperPair);
+                } else if (! upperAtLastTwo) {
+                    tasks.push(lowerPair);
+                } else if (split - l > u - split - 1) {
+                    // lowerPair is larger than upperPair
+                    tasks.push(lowerPair);
+                    tasks.push(upperPair);
+                } else {
+                    // upperPair is larger than lowerPair
+                    tasks.push(upperPair);
+                    tasks.push(lowerPair);
+                }
             }
         }
         return list;

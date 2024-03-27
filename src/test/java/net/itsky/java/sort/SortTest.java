@@ -400,7 +400,8 @@ public class SortTest {
         Sort<String, List<String>> quickSortMiddle = new QuickSort<>(QuickSort.PivotStyle.MIDDLE);
         Sort<String, List<String>> quickSortLast = new QuickSort<>(QuickSort.PivotStyle.LAST);
         Sort<String, List<String>> quickSortRandom = new QuickSort<>(QuickSort.PivotStyle.RANDOM);
-        List<Sort<String, List<String>>> sorters = List.of(heapSort, ternaryHeapSort, quickSortMedian3, quickSortMedian5, quickSortFirst, quickSortMiddle, quickSortLast, quickSortRandom);
+        Sort<String, List<String>> insertionSort = new InsertionSort<>();
+        List<Sort<String, List<String>>> sorters = List.of(heapSort, ternaryHeapSort, quickSortMedian3, quickSortMedian5, quickSortFirst, quickSortMiddle, quickSortLast, quickSortRandom, insertionSort);
         for (Sort<String, List<String>> sorter : sorters) {
             System.out.println("sort");
             assertEquals(NUMBERS_SORTED, sorter.sort(new ArrayList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), swapper));

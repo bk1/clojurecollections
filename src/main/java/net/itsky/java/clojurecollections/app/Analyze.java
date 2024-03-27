@@ -11,17 +11,42 @@ import java.util.List;
 
 public class Analyze {
 
+    private static final int C = 1;
+    private static final int M = 100;
+
+    private static final int BEGIN = 65536;
+    private static final int END = 65537;
+
+    private static final int FACTOR = 65538;
+
     public void analyze(List<String> lines) {
         MutableIntLongMapFactory factory = new MutableIntLongMapFactoryImpl();
-        MutableIntLongMap map = factory.empty();
+        MutableIntLongMap singleMap = factory.empty();
         for (String line : lines) {
             line += "\n";
             line.chars().forEach(c -> {
-                map.put(c, 1+map.getIfAbsent(c, 0));
+                singleMap.put(c, M + singleMap.getIfAbsent(c, C));
             });
         }
-        for (int i : map.keySet().toArray()) {
-            System.out.println("c=" + String.format("%6d", i) + " m=" + String.format("%9d", map.get(i)));
+        MutableIntLongMap doubleMap = factory.empty();
+        for (String line : lines) {
+            line += "\n";
+            int prevChar = BEGIN;
+            line.chars().forEach(c -> {
+                if (singleMap.containsKey(prevChar)) {
+                    int key = prevChar * FACTOR + c;
+                    doubleMap.put(key, M+doubleMap.getIfAbsent(key, C));
+                }
+
+            });
+        }
+        for (int i : singleMap.keySet().toArray()) {
+            System.out.println("c=" + String.format("%6d", i) + " m=" + String.format("%9d", singleMap.get(i)));
+        }
+        for (int i : doubleMap.keySet().toArray()) {
+            int c = i / FACTOR;
+            int d = i % FACTOR;
+            System.out.println("(c,d)=" + String.format("%6d", c) + ", " + String.format("%6d", d) + ") m=" + String.format("%9d", doubleMap.get(i)));
         }
     }
 }
