@@ -1,4 +1,4 @@
-package net.itsky.java.clojurecollections;
+package net.itsky.java.clojurecollections.app;
 
 import org.eclipse.collections.api.block.function.primitive.IntFunction;
 import org.eclipse.collections.api.block.function.primitive.LongFunction;
