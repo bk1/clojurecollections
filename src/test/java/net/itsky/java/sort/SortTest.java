@@ -199,6 +199,45 @@ public class SortTest {
 
 
     @Test
+    void testParallelQuckSort() {
+        List<String> unsortedList = new ArrayList<>(UNSORTED);
+        PersistentList<String> unsortedP = new PersistentList<>(UNSORTED);
+        TransientList<String> unsortedT = new TransientList<>(UNSORTED);
+
+        Sort<String, List<String>> listSort = new ParallelQuickSort<>();
+        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), new ListSwapper<>());
+        assertEquals(SORTED, sortedList);
+
+        Sort<String, PersistentList<String>> plistSort = new ParallelQuickSort<>();
+        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), new PersistentListSwapper<String>());
+        assertEquals(SORTED, sortedP);
+
+        Sort<String, TransientList<String>> tlistSort = new ParallelQuickSort<>();
+        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), new TransientListSwapper<String>());
+        assertEquals(SORTED, sortedT);
+    }
+
+    @Test
+    void testParallelQuckSortLong() {
+        List<String> unsortedList = new ArrayList<>(LONG_UNSORTED);
+        PersistentList<String> unsortedP = new PersistentList<>(LONG_UNSORTED);
+        TransientList<String> unsortedT = new TransientList<>(LONG_UNSORTED);
+
+        Sort<String, List<String>> listSort = new ParallelQuickSort<>();
+        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), new ListSwapper<>());
+        assertEquals(LONG_SORTED, sortedList);
+
+        Sort<String, PersistentList<String>> plistSort = new ParallelQuickSort<>();
+        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), new PersistentListSwapper<String>());
+        assertEquals(LONG_SORTED, sortedP);
+
+        Sort<String, TransientList<String>> tlistSort = new ParallelQuickSort<>();
+        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), new TransientListSwapper<String>());
+        assertEquals(LONG_SORTED, sortedT);
+    }
+
+
+    @Test
     void testHeapSort() {
         List<String> unsortedList = new ArrayList<>(UNSORTED);
         PersistentList<String> unsortedP = new PersistentList<>(UNSORTED);
@@ -376,6 +415,7 @@ public class SortTest {
         Sort<Integer, List<Integer>> heapSort = new HeapSort<>();
         Sort<Integer, List<Integer>> ternaryHeapSort = new TerneryHeapSort<>();
         Sort<Integer, List<Integer>> quickSort = new QuickSort<>();
+        Sort<Integer, List<Integer>> parallelQuickSort = new ParallelQuickSort<>();
         ListSwapper<Integer> swapper = new ListSwapper<>();
         for (int n = 0; n <= 8; n++) {
             List<List<Integer>> permutations = createAllPermutations(n);
@@ -384,6 +424,7 @@ public class SortTest {
                 assertEquals(sorted, heapSort.sort(new ArrayList<>(unsorted), Comparator.naturalOrder(), swapper), () -> "unsorted=" + unsorted);
                 assertEquals(sorted, ternaryHeapSort.sort(new ArrayList<>(unsorted), Comparator.naturalOrder(), swapper), () -> "unsorted=" + unsorted);
                 assertEquals(sorted, quickSort.sort(new ArrayList<>(unsorted), Comparator.naturalOrder(), swapper), () -> "unsorted=" + unsorted);
+                assertEquals(sorted, parallelQuickSort.sort(new ArrayList<>(unsorted), Comparator.naturalOrder(), swapper), () -> "unsorted=" + unsorted);
             }
         }
     }
@@ -400,8 +441,9 @@ public class SortTest {
         Sort<String, List<String>> quickSortMiddle = new QuickSort<>(QuickSort.PivotStyle.MIDDLE);
         Sort<String, List<String>> quickSortLast = new QuickSort<>(QuickSort.PivotStyle.LAST);
         Sort<String, List<String>> quickSortRandom = new QuickSort<>(QuickSort.PivotStyle.RANDOM);
+        Sort<String, List<String>> parallelQuickSort = new ParallelQuickSort<>();
         Sort<String, List<String>> insertionSort = new InsertionSort<>();
-        List<Sort<String, List<String>>> sorters = List.of(heapSort, ternaryHeapSort, quickSortMedian3, quickSortMedian5, quickSortFirst, quickSortMiddle, quickSortLast, quickSortRandom, insertionSort);
+        List<Sort<String, List<String>>> sorters = List.of(heapSort, ternaryHeapSort, quickSortMedian3, quickSortMedian5, quickSortFirst, quickSortMiddle, quickSortLast, quickSortRandom, parallelQuickSort, insertionSort);
         for (Sort<String, List<String>> sorter : sorters) {
             System.out.println("sort");
             assertEquals(NUMBERS_SORTED, sorter.sort(new ArrayList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), swapper));

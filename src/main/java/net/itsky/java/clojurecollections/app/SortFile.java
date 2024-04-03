@@ -35,6 +35,10 @@ public class SortFile {
         Sort<String, PersistentList<String>> randomQuickSortP = new QuickSort<>(QuickSort.PivotStyle.RANDOM);
         Sort<String, TransientList<String>> randomQuickSortT = new QuickSort<>(QuickSort.PivotStyle.RANDOM);
 
+        Sort<String, List<String>> parallelQuickSortList = new ParallelQuickSort<>();
+        Sort<String, PersistentList<String>> parallelQuickSortP = new ParallelQuickSort<>();
+        Sort<String, TransientList<String>> parallelQuickSortT = new ParallelQuickSort<>();
+
         long jl = 0;
         long hl = 0;
         long hp = 0;
@@ -51,6 +55,10 @@ public class SortFile {
         long qrl = 0;
         long qrp = 0;
         long qrt = 0;
+
+        long pl = 0;
+        long pp = 0;
+        long pt = 0;
 
         for (int i = 0; i < 10; i++) {
             List<String> jlist = new ArrayList<>(lines);
@@ -186,6 +194,31 @@ public class SortFile {
                 System.out.println("sortedRPQ or sortedRTQ differ for quicksort (R)");
             }
 
+            list = new ArrayList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedListPQ = parallelQuickSortList.sort(list, Comparator.naturalOrder(), new ListSwapper<>());
+            pl += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " pl =" + pl / (i + 1));
+
+            plist = new PersistentList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedPPQ = parallelQuickSortP.sort(plist, Comparator.naturalOrder(), new PersistentListSwapper<String>());
+            pp += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " pp=" + pp / (i + 1));
+
+            tlist = new TransientList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedTPQ = parallelQuickSortT.sort(tlist, Comparator.naturalOrder(), new TransientListSwapper<String>());
+            pt += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " pt=" + pt
+                    / (i + 1));
+
+            if (! jlist.equals(sortedListPQ)) {
+                System.out.println("parallel quicksort failed");
+            }
+            if (! sortedList.equals(sortedPPQ) || ! sortedList.equals(sortedTPQ)) {
+                System.out.println("sortedRPQ or sortedRTQ differ for parallel quicksort");
+            }
         }
     }
 
