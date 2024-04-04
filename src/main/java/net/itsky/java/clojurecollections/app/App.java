@@ -1,16 +1,9 @@
 package net.itsky.java.clojurecollections.app;
 
-import net.itsky.java.clojurecollections.PersistentList;
-import net.itsky.java.clojurecollections.TransientList;
-import net.itsky.java.clojurecollections.app.Analyze;
-import net.itsky.java.sort.*;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Collections;
 
 /**
  * Hello world!
@@ -19,7 +12,8 @@ public class App {
 
     private static enum Operation {
         ANALYZE,
-        SORT;
+        LINE_SORT,
+        NUM_SORT;
     }
 
     public static void main(String[] args) {
@@ -59,9 +53,13 @@ public class App {
         System.out.println("" + lines.size() + " lines");
 
         switch (operation) {
-            case SORT -> {
-                SortFile sortFile = new SortFile();
-                sortFile.sortFileContent(lines);
+            case LINE_SORT -> {
+                SortFileLines sortFileLines = new SortFileLines();
+                sortFileLines.sortFileContent(lines);
+            }
+            case NUM_SORT -> {
+                SortFileNumbers sortFileNumbers = new SortFileNumbers();
+                sortFileNumbers.sortFileContent(lines);
             }
             case ANALYZE ->  {
                 Analyze analyze = new Analyze();

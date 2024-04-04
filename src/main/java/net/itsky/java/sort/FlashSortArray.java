@@ -9,16 +9,14 @@ import java.util.Arrays;
 public class FlashSortArray {
     private static int fsortCalculateK(long metricValue, double factor, int lsize) {
         // calculate prod as factor*value, add a small delta for rounding, force it into the closed interval [0,lsize-1] using min and max
-        double prodUnlimited = factor * metricValue + 1e-9;
-        double prodNonNegative = Math.max(0, prodUnlimited);
-        double prodFloat = Math.min(prodNonNegative, lsize - 1);
-        int result = (int) prodFloat;
-        if (prodFloat < 0 || Math.abs(prodFloat - result) > 1.5) {
-            // this should not happen, because prodFloat was prepared in a way to avoid it...
-            // TODO prove & test with extreme values
-            throw new IllegalStateException("Overflow/Underflow of Int when casting from " + prodFloat);
+        int result = (int) (factor * metricValue + 1e-9);
+        if (result < 0) {
+            return 0;
+        } else if (result > lsize -1) {
+            return lsize - 1;
+        } else {
+            return result;
         }
-        return result;
     }
 
     public static void fsort(long[] array) {
@@ -27,91 +25,84 @@ public class FlashSortArray {
 
     public static void fsort(long[] array,
                              double factor) {
-        int nmemb = array.length;
-        if (nmemb <= 1) {
+        int aSize = array.length;
+        if (aSize <= 1) {
             // nothing to sort
             return;
         }
 
-        /* preparation: form classes */
-        /* use calculate_k for a purpose it has not been made for, but since it is identical with what is needed here it is correct */
-        int lsize = fsortCalculateK(nmemb, factor, nmemb) + 1;
-        if (lsize < 2) {
-            lsize = 2;
+        // preparation: form classes
+        // use fsortCalculateK for a purpose it has not been made for, but since it is identical with what is needed here it is correct
+        int lSize = fsortCalculateK(aSize, factor, aSize) + 1;
+        if (lSize < 2) {
+            lSize = 2;
         }
-        int[] l = new int[lsize];
-        //size_t idx_min = 0;
-        int amin = 0;
-        int amax = 0;
-        for (int i = 0; i < nmemb; i++) {
-            if (array[i] < array[amin]) {
-                // idx_min = i;
-                amin = i;
+        int[] l = new int[lSize];
+        int maxIdx = 0;
+        long aMin = array[0];
+        long aMax = array[0];
+        for (int i = 0; i < aSize; i++) {
+            long ai = array[i];
+            if (ai < aMin) {
+                aMin = ai;
             }
-            if (array[i] > array[amax]) {
-                amax = i;
+            if (ai > aMax) {
+                maxIdx = i;
+                aMax = ai;
             }
         }
-        if (array[amin] == array[amax]) {
-            /* min and max are the same --> already sorted */
+        if (aMin == aMax) {
+            // min and max are the same --> already sorted
             return;
         }
-        long amin_metric = array[amin];
-        long amax_metric = array[amax];
-        double step = (lsize - 1) / (double) (amax_metric - amin_metric);
+        double step = (lSize - 1) / (double) (aMax - aMin);
 
-        /* count the elements in each of the lsize classes */
-        for (int i = 0; i < nmemb; i++) {
-            int k = fsortCalculateK(array[i] - amin_metric, step, lsize);
+        // count the elements in each of the lSize classes
+        for (int i = 0; i < aSize; i++) {
+            int k = fsortCalculateK(array[i] - aMin, step, lSize);
             l[k]++;
         }
 
         /* find the start positions for each of the classes */
-        int[] ll = new int[lsize + 1];
+        int[] ll = new int[lSize + 1];
         ll[0] = 0;
         ll[1] = l[0];
 
-        for (int k = 1; k < lsize; k++) {
+        for (int k = 1; k < lSize; k++) {
             l[k] += l[k - 1];
             ll[k + 1] = l[k];
         }
 
-        {
-            long x = array[0];
-            array[0] = array[amax];
-            array[amax] = x;
-        }
+        array[maxIdx] = array[0];
+        array[0] = aMax;
 
         /* do the permutation */
-        int nmove = 0;
+        int nMove = 0;
         int j = 0;
-        int k = lsize - 1;
-        while (nmove < nmemb - 1) {
+        int k = lSize - 1;
+        while (nMove < aSize - 1) {
             while (j >= l[k]) {
                 j++;
-                k = fsortCalculateK(array[j] - amin_metric, step, lsize);
+                k = fsortCalculateK(array[j] - aMin, step, lSize);
             }
             /* now: j < l[k] */
             long x = array[j];
-            /* flash_ptr takes element a[j] such that j > l[k] */
             while (j != l[k]) {
-                k = fsortCalculateK(x - amin_metric, step, lsize);
-                long y = array[l[k] - 1];
-                array[l[k] - 1] = x;
+                k = fsortCalculateK(x - aMin, step, lSize);
+                int idx = l[k] - 1;
+                long y = array[idx];
+                array[idx] = x;
                 x = y;
                 l[k]--;
-                nmove++;
+                nMove++;
             }
         }
 
         /* use qsort or hsort for each class */
-        for (k = 0; k < lsize; k++) {
-            int n = ll[k + 1] - ll[k];
-            if (n > 1 && ll[k + 1] < ll[k] || n > nmemb) {
-                throw new IllegalStateException(String.format("wrong order: k=%ld lsize=%ld nmemb=%ld n=%ld ll[k]=%ld ll[k+1]=%ld\n", k, lsize, nmemb, n, ll[k], ll[k + 1]));
-            }
-            if (n > 1) {
-                Arrays.sort(array, ll[k], ll[k] + n);
+        for (k = 0; k < lSize; k++) {
+            int classSize = ll[k + 1] - ll[k];
+            if (classSize > 1) {
+                Arrays.sort(array, ll[k], ll[k+1]);
             }
         }
         return;

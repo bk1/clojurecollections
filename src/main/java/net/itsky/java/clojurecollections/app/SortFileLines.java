@@ -4,8 +4,6 @@ import net.itsky.java.clojurecollections.PersistentList;
 import net.itsky.java.clojurecollections.TransientList;
 import net.itsky.java.sort.*;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,7 +12,7 @@ import java.util.List;
 /**
  * Hello world!
  */
-public class SortFile {
+public class SortFileLines {
     public void sortFileContent(List<String> lines) {
 
         Sort<String, List<String>> heapSortList = new HeapSort<>();
