@@ -40,6 +40,13 @@ public class SortFileNumbers {
 
         long jl = 0;
         long fl = 0;
+        long flA = 0;
+        long flB = 0;
+        long flC = 0;
+        long flD = 0;
+        long flE = 0;
+        long flU = 0;
+
         long fl01 = 0;
         long fl02 = 0;
         long fl03 = 0;
@@ -59,6 +66,66 @@ public class SortFileNumbers {
             System.out.println("i=" + i + " fl=" + fl / (i + 1));
             LongArrayList jlist = new LongArrayList(jarray);
             LongArrayList fList = new LongArrayList(farray);
+            if (!jlist.equals(fList)) {
+                System.out.println("flashsort failed");
+            }
+
+            farray = Arrays.stream(numbers).toArray();
+            t0 = System.currentTimeMillis();
+            FlashSortArray.fsort(farray, 0.42, 1000);
+            flA += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " flA=" + flA / (i + 1));
+            fList = new LongArrayList(farray);
+            if (!jlist.equals(fList)) {
+                System.out.println("flashsort failed");
+            }
+
+            farray = Arrays.stream(numbers).toArray();
+            t0 = System.currentTimeMillis();
+            FlashSortArray.fsort(farray, 0.42, 3000);
+            flB += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " flB=" + flB / (i + 1));
+            fList = new LongArrayList(farray);
+            if (!jlist.equals(fList)) {
+                System.out.println("flashsort failed");
+            }
+
+            farray = Arrays.stream(numbers).toArray();
+            t0 = System.currentTimeMillis();
+            FlashSortArray.fsort(farray, 0.42, 30000);
+            flC += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " flC=" + flC / (i + 1));
+            fList = new LongArrayList(farray);
+            if (!jlist.equals(fList)) {
+                System.out.println("flashsort failed");
+            }
+
+            farray = Arrays.stream(numbers).toArray();
+            t0 = System.currentTimeMillis();
+            FlashSortArray.fsort(farray, 0.42, 100_000);
+            flD += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " flD=" + flD / (i + 1));
+            fList = new LongArrayList(farray);
+            if (!jlist.equals(fList)) {
+                System.out.println("flashsort failed");
+            }
+
+            farray = Arrays.stream(numbers).toArray();
+            t0 = System.currentTimeMillis();
+            FlashSortArray.fsort(farray, 0.42, 10_000_000);
+            flE += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " flE=" + flE / (i + 1));
+            fList = new LongArrayList(farray);
+            if (!jlist.equals(fList)) {
+                System.out.println("flashsort failed");
+            }
+
+            farray = Arrays.stream(numbers).toArray();
+            t0 = System.currentTimeMillis();
+            FlashSortArray.fsort(farray, 0.42, 1_000_000_000);
+            flU += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " flU=" + flU / (i + 1));
+            fList = new LongArrayList(farray);
             if (!jlist.equals(fList)) {
                 System.out.println("flashsort failed");
             }
