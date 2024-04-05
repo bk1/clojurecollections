@@ -7,20 +7,23 @@ import java.util.Arrays;
 
 
 public class FlashSortArray {
-    private static int fsortCalculateK(long metricValue, double factor, int lsize) {
-        // calculate prod as factor*value, add a small delta for rounding, force it into the closed interval [0,lsize-1] using min and max
+
+    private static final double DEFAULT_FACTOR = 0.42;
+
+    private static int fsortCalculateK(long metricValue, double factor, int n) {
+        // calculate prod as factor*value, add a small delta for rounding, force it into the closed interval [0,n-1]
         int result = (int) (factor * metricValue + 1e-9);
         if (result < 0) {
             return 0;
-        } else if (result > lsize -1) {
-            return lsize - 1;
+        } else if (result >= n) {
+            return n - 1;
         } else {
             return result;
         }
     }
 
     public static void fsort(long[] array) {
-        fsort(array, 0.42);
+        fsort(array, DEFAULT_FACTOR);
     }
 
     public static void fsort(long[] array,
@@ -62,6 +65,24 @@ public class FlashSortArray {
             int k = fsortCalculateK(array[i] - aMin, step, lSize);
             l[k]++;
         }
+
+        int maxL = 0;
+        int minL = Integer.MAX_VALUE;
+        long sumL = aSize;
+        long sumLL = 0;
+        for (int k = 0; k < lSize; k++) {
+            int lk = l[k];
+            if (lk > maxL) {
+                maxL = lk;
+            }
+            if (lk < minL) {
+                minL = lk;
+            }
+            sumLL += lk*lk;
+        }
+        double avg = sumL / (double) lSize;
+        double sdev = Math.sqrt((sumLL - aSize * avg) / lSize);
+        System.out.println("aSize=" + aSize + " lSize=" + lSize + " minL=" + minL + " maxL=" + maxL + " step=" + step + " avg=" +avg + " sdev=" + sdev);
 
         /* find the start positions for each of the classes */
         int[] ll = new int[lSize + 1];
