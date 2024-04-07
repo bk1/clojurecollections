@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+//import static org.junit.jupiter.api.Assertions.assertEquals;
+//import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * Hello world!
  */
@@ -23,19 +26,23 @@ public class SortFileLines {
         Sort<String, PersistentList<String>> ternaryHeapSortP = new TerneryHeapSort<>();
         Sort<String, TransientList<String>> ternaryHeapSortT = new TerneryHeapSort<>();
 
-        Sort<String, List<String>> quickSort3List = new QuickSort<>(QuickSort.PivotStyle.MEDIAN3);
-        Sort<String, PersistentList<String>> quickSort3P = new QuickSort<>(QuickSort.PivotStyle.MEDIAN3);
-        Sort<String, TransientList<String>> quickSort3T = new QuickSort<>(QuickSort.PivotStyle.MEDIAN3);
-        Sort<String, List<String>> quickSort5List = new QuickSort<>(QuickSort.PivotStyle.MEDIAN5);
-        Sort<String, PersistentList<String>> quickSort5P = new QuickSort<>(QuickSort.PivotStyle.MEDIAN5);
-        Sort<String, TransientList<String>> quickSort5T = new QuickSort<>(QuickSort.PivotStyle.MEDIAN5);
-        Sort<String, List<String>> randomQuickSortList = new QuickSort<>(QuickSort.PivotStyle.RANDOM);
-        Sort<String, PersistentList<String>> randomQuickSortP = new QuickSort<>(QuickSort.PivotStyle.RANDOM);
-        Sort<String, TransientList<String>> randomQuickSortT = new QuickSort<>(QuickSort.PivotStyle.RANDOM);
+        Sort<String, List<String>> quickSort3List = new QuickSort<>(QuickSortPivotStyle.MEDIAN3);
+        Sort<String, PersistentList<String>> quickSort3P = new QuickSort<>(QuickSortPivotStyle.MEDIAN3);
+        Sort<String, TransientList<String>> quickSort3T = new QuickSort<>(QuickSortPivotStyle.MEDIAN3);
+        Sort<String, List<String>> quickSort5List = new QuickSort<>(QuickSortPivotStyle.MEDIAN5);
+        Sort<String, PersistentList<String>> quickSort5P = new QuickSort<>(QuickSortPivotStyle.MEDIAN5);
+        Sort<String, TransientList<String>> quickSort5T = new QuickSort<>(QuickSortPivotStyle.MEDIAN5);
+        Sort<String, List<String>> randomQuickSortList = new QuickSort<>(QuickSortPivotStyle.RANDOM);
+        Sort<String, PersistentList<String>> randomQuickSortP = new QuickSort<>(QuickSortPivotStyle.RANDOM);
+        Sort<String, TransientList<String>> randomQuickSortT = new QuickSort<>(QuickSortPivotStyle.RANDOM);
 
         Sort<String, List<String>> parallelQuickSortList = new ParallelQuickSort<>();
         Sort<String, PersistentList<String>> parallelQuickSortP = new ParallelQuickSort<>();
         Sort<String, TransientList<String>> parallelQuickSortT = new ParallelQuickSort<>();
+
+        SortMetricized<String, List<String>> defaultFlashSortList = new FlashSort<>();
+        SortMetricized<String, PersistentList<String>> defaultFlashSortP = new FlashSort<>();
+        SortMetricized<String, TransientList<String>> defaultFlashSortT = new FlashSort<>();
 
         long jl = 0;
         long hl = 0;
@@ -44,9 +51,10 @@ public class SortFileLines {
         long tl = 0;
         long tp = 0;
         long tt = 0;
-        long ql = 0;
-        long qp = 0;
-        long qt = 0;
+
+        long q3l = 0;
+        long q3p = 0;
+        long q3t = 0;
         long q5l = 0;
         long q5p = 0;
         long q5t = 0;
@@ -57,6 +65,10 @@ public class SortFileLines {
         long pl = 0;
         long pp = 0;
         long pt = 0;
+
+        long fl = 0;
+        long fp = 0;
+        long ft = 0;
 
         for (int i = 0; i < 10; i++) {
             List<String> jlist = new ArrayList<>(lines);
@@ -118,20 +130,20 @@ public class SortFileLines {
             list = new ArrayList<>(lines);
             t0 = System.currentTimeMillis();
             List<String> sorted3ListQ = quickSort3List.sort(list, Comparator.naturalOrder(), new ListSwapper<>());
-            ql += System.currentTimeMillis() - t0;
-            System.out.println("i=" + i + " ql=" + ql / (i + 1));
+            q3l += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " q3l=" + q3l / (i + 1));
 
             plist = new PersistentList<>(lines);
             t0 = System.currentTimeMillis();
             List<String> sorted3PQ = quickSort3P.sort(plist, Comparator.naturalOrder(), new PersistentListSwapper<String>());
-            qp += System.currentTimeMillis() - t0;
-            System.out.println("i=" + i + " qp=" + qp / (i + 1));
+            q3p += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " q3p=" + q3p / (i + 1));
 
             tlist = new TransientList<>(lines);
             t0 = System.currentTimeMillis();
             List<String> sorted3TQ = quickSort3T.sort(tlist, Comparator.naturalOrder(), new TransientListSwapper<String>());
-            qt += System.currentTimeMillis() - t0;
-            System.out.println("i=" + i + " qt=" + qt / (i + 1));
+            q3t += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " q3t=" + q3t / (i + 1));
 
             if (! jlist.equals(sorted3ListQ)) {
                 System.out.println("quicksort failed (3)");
@@ -217,6 +229,42 @@ public class SortFileLines {
             if (! sortedList.equals(sortedPPQ) || ! sortedList.equals(sortedTPQ)) {
                 System.out.println("sortedRPQ or sortedRTQ differ for parallel quicksort");
             }
+
+
+
+
+            Metric<String> defaultMetric = new DefaultStringMetric();
+
+            list = new ArrayList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedListF = defaultFlashSortList.sort(list, Comparator.naturalOrder(), new ListSwapper<>(), defaultMetric);
+            fl += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fl =" + fl / (i + 1));
+
+            plist = new PersistentList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedPF = defaultFlashSortP.sort(plist, Comparator.naturalOrder(), new PersistentListSwapper<String>(), defaultMetric);
+            fp += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fp=" + fp / (i + 1));
+
+            tlist = new TransientList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedTF = defaultFlashSortT.sort(tlist, Comparator.naturalOrder(), new TransientListSwapper<String>(), defaultMetric);
+            ft += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " ft=" + ft
+                    / (i + 1));
+
+            if (! jlist.equals(sortedListF)) {
+                System.out.println("flashSort failed");
+                //assertEquals(jlist, sortedListF);
+
+            }
+            if (! sortedList.equals(sortedPF) || ! sortedList.equals(sortedTF)) {
+                System.out.println("sortedPF or sortedTF differ for flashsort");
+            }
+
+
+
         }
     }
 

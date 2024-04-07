@@ -39,9 +39,11 @@ public class Analyze {
                 return c;
             });
         }
+        System.out.println("singleMap.size=" + singleMap.size());
         for (int i : singleMap.keySet().toArray()) {
             System.out.println("c=" + String.format("%6d", i) + " m=" + String.format("%9d", singleMap.get(i)));
         }
+        System.out.println("doubleMap.size=" + doubleMap.size());
         for (int i : doubleMap.keySet().toArray()) {
             int c = i / FACTOR;
             int d = i % FACTOR;

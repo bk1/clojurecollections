@@ -11,26 +11,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
+import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SortTest {
-
-    private static final List<String> UNSORTED = List.of("FL8YPS", "6DSNQQ", "U419AB", "X82QVN", "CU25H4", "ZZCRWY");
-    private static final List<String> SORTED = new ArrayList<>(UNSORTED);
-    ;
-
-    private static final List<String> LONG_UNSORTED = List.of("0H9Y41BL8WUQ", "7WPFZU00FHJQ", "D0OBE9SD6DPE", "AGBYG6MMCC9B", "E9SPYKWAITU9", "1VT6J5VSDMX9", "WSW1YJI40W8H", "378PPNCN6OW8", "JL819RD3CFTS", "C2YGBBGXXCBV", "KAGQZ7DY82WS", "C6N3W0RU4N5M", "XSJ9V3MN73TA", "8OPVKYG8JHYA", "UN0P5TKDEA05", "XP0KKYPUSTSF", "JS308V9PAJ2Z", "09NYKUUCTM5U", "AFID27K03CXA", "EPS16MESPLM7", "4FSSP0UJB6Q6", "FJG8FS1F2QXB", "L06RQWNPRFLJ", "TW9GAH01TK02", "2BSNA7IBHTRH", "H7IQKOMZ388X", "Y4B7SEEE5QMP", "C22P8R9UBPS7", "KVJE98AOILZ8", "LJLDM4AEA0AD", "1EVSCZGQ55MV", "E1LN8FRI5VNQ", "32NYE2DD9MBO", "OCKJPM3NKQ7P", "0IFOJ8OAY4H9", "5ERNL1PBOKOC", "76I2GY4KQOXP", "8EKLG4FQFU8K", "VP0J12B839EU", "94D3IKF9BITJ");
-    private static final List<String> LONG_SORTED = new ArrayList<>(LONG_UNSORTED);
-
-    private static final List<String> NUMBERS_UNSORTED = IntStream.range(0, 1001).map(x -> (1 + x + x * x) % 1001).boxed().map(x -> String.format("%04d", x)).toList();
-    private static final List<String> NUMBERS_SORTED = new ArrayList<>(NUMBERS_UNSORTED);
-
-    static {
-        Collections.sort(SORTED);
-        Collections.sort(LONG_SORTED);
-        Collections.sort(NUMBERS_SORTED);
-    }
 
     private <T, L extends List<T>> Sort<T, L> insertionSort() {
         return (L list, Comparator<T> comparator, Swapper<T, L> swapper) -> {
@@ -435,17 +420,16 @@ public class SortTest {
         ListSwapper<String> swapper = new ListSwapper<>();
         Sort<String, List<String>> heapSort = new HeapSort<>();
         Sort<String, List<String>> ternaryHeapSort = new TerneryHeapSort<>();
-        Sort<String, List<String>> quickSortMedian3 = new QuickSort<>(QuickSort.PivotStyle.MEDIAN3);
-        Sort<String, List<String>> quickSortMedian5 = new QuickSort<>(QuickSort.PivotStyle.MEDIAN5);
-        Sort<String, List<String>> quickSortFirst = new QuickSort<>(QuickSort.PivotStyle.FIRST);
-        Sort<String, List<String>> quickSortMiddle = new QuickSort<>(QuickSort.PivotStyle.MIDDLE);
-        Sort<String, List<String>> quickSortLast = new QuickSort<>(QuickSort.PivotStyle.LAST);
-        Sort<String, List<String>> quickSortRandom = new QuickSort<>(QuickSort.PivotStyle.RANDOM);
+        Sort<String, List<String>> quickSortMedian3 = new QuickSort<>(QuickSortPivotStyle.MEDIAN3);
+        Sort<String, List<String>> quickSortMedian5 = new QuickSort<>(QuickSortPivotStyle.MEDIAN5);
+        Sort<String, List<String>> quickSortFirst = new QuickSort<>(QuickSortPivotStyle.FIRST);
+        Sort<String, List<String>> quickSortMiddle = new QuickSort<>(QuickSortPivotStyle.MIDDLE);
+        Sort<String, List<String>> quickSortLast = new QuickSort<>(QuickSortPivotStyle.LAST);
+        Sort<String, List<String>> quickSortRandom = new QuickSort<>(QuickSortPivotStyle.RANDOM);
         Sort<String, List<String>> parallelQuickSort = new ParallelQuickSort<>();
         Sort<String, List<String>> insertionSort = new InsertionSort<>();
         List<Sort<String, List<String>>> sorters = List.of(heapSort, ternaryHeapSort, quickSortMedian3, quickSortMedian5, quickSortFirst, quickSortMiddle, quickSortLast, quickSortRandom, parallelQuickSort, insertionSort);
         for (Sort<String, List<String>> sorter : sorters) {
-            System.out.println("sort");
             assertEquals(NUMBERS_SORTED, sorter.sort(new ArrayList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), swapper));
         }
     }

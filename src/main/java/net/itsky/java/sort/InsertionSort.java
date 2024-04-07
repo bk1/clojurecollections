@@ -3,7 +3,7 @@ package net.itsky.java.sort;
 import java.util.Comparator;
 import java.util.List;
 
-public class InsertionSort<T, L extends List<T>> implements Sort<T, L> {
+public class InsertionSort<T, L extends List<T>> implements Sort<T, L>, SortSubList<T, L> {
 
     @Override
     public L sort(L list, Comparator<T> comparator, Swapper<T, L> swapper) {
@@ -23,12 +23,13 @@ public class InsertionSort<T, L extends List<T>> implements Sort<T, L> {
         return list;
     }
 
-    public L sortSublist(L list, int lower, int upper, Comparator<T> comparator, Swapper<T, L> swapper) {
-        int n = upper - lower;
-        for (int i = lower; i < upper; i++) {
+    @Override
+    public L sort(L list, Comparator<T> comparator, Swapper<T, L> swapper, int begin, int end) {
+        int n = end - begin;
+        for (int i = begin; i < end; i++) {
             T t = list.get(i);
             int j;
-            for (j = lower; j < i; j++) {
+            for (j = begin; j < i; j++) {
                 if (comparator.compare(list.get(j), list.get(i)) >= 0) {
                     break;
                 }
@@ -39,6 +40,5 @@ public class InsertionSort<T, L extends List<T>> implements Sort<T, L> {
         }
         return list;
     }
-
 
 }

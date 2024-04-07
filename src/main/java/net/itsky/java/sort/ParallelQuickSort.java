@@ -5,25 +5,16 @@ import java.util.*;
 
 public class ParallelQuickSort<T, L extends List<T>> implements Sort<T, L> {
 
-    public enum PivotStyle {
-        FIRST,
-        MIDDLE,
-        LAST,
-        MEDIAN3,
-        MEDIAN5,
-        RANDOM
-    }
-
-    private final PivotStyle pivotStyle;
+    private final QuickSortPivotStyle pivotStyle;
     private final Random random;
 
     public ParallelQuickSort() {
-        this(PivotStyle.MEDIAN3);
+        this(QuickSortPivotStyle.MEDIAN3);
     }
 
-    public ParallelQuickSort(PivotStyle pivotStyle) {
+    public ParallelQuickSort(QuickSortPivotStyle pivotStyle) {
         this.pivotStyle = pivotStyle;
-        if (pivotStyle == PivotStyle.RANDOM) {
+        if (pivotStyle == QuickSortPivotStyle.RANDOM) {
             random = new SecureRandom();
         } else {
             random = null;
