@@ -20,9 +20,6 @@ public class ParallelQuickSort<T, L extends List<T>> implements Sort<T, L> {
             random = null;
         }
     }
-
-    private record Pair(int lower, int upper) {
-    }
     private final InsertionSort<Integer, List<Integer>> sortElementWithIdx2 = new InsertionSort<>();
 
     private final ListSwapper<Integer> swapInt = new ListSwapper<>();
@@ -112,8 +109,8 @@ public class ParallelQuickSort<T, L extends List<T>> implements Sort<T, L> {
         tasks.push(new Pair(0, n));
         while (!tasks.isEmpty()) {
             Pair limits = tasks.pop();
-            int l = limits.lower;
-            int u = limits.upper;
+            int l = limits.lower();
+            int u = limits.upper();
             if (u - l <= 1) {
                 // one element -> already sorted
                 continue;

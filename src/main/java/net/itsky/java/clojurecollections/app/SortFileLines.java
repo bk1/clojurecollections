@@ -29,6 +29,9 @@ public class SortFileLines {
         Sort<String, List<String>> quickSort3List = new QuickSort<>(QuickSortPivotStyle.MEDIAN3);
         Sort<String, PersistentList<String>> quickSort3P = new QuickSort<>(QuickSortPivotStyle.MEDIAN3);
         Sort<String, TransientList<String>> quickSort3T = new QuickSort<>(QuickSortPivotStyle.MEDIAN3);
+        Sort<String, List<String>> quickSortMList = new QuickSort<>(QuickSortPivotStyle.MIDDLE);
+        Sort<String, PersistentList<String>> quickSortMP = new QuickSort<>(QuickSortPivotStyle.MIDDLE);
+        Sort<String, TransientList<String>> quickSortMT = new QuickSort<>(QuickSortPivotStyle.MIDDLE);
         Sort<String, List<String>> quickSort5List = new QuickSort<>(QuickSortPivotStyle.MEDIAN5);
         Sort<String, PersistentList<String>> quickSort5P = new QuickSort<>(QuickSortPivotStyle.MEDIAN5);
         Sort<String, TransientList<String>> quickSort5T = new QuickSort<>(QuickSortPivotStyle.MEDIAN5);
@@ -61,6 +64,9 @@ public class SortFileLines {
         long qrl = 0;
         long qrp = 0;
         long qrt = 0;
+        long qml = 0;
+        long qmp = 0;
+        long qmt = 0;
 
         long pl = 0;
         long pp = 0;
@@ -202,6 +208,33 @@ public class SortFileLines {
             }
             if (! sortedList.equals(sortedRPQ) || ! sortedList.equals(sortedRTQ)) {
                 System.out.println("sortedRPQ or sortedRTQ differ for quicksort (R)");
+            }
+
+
+
+            list = new ArrayList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedMListQ = quickSortMList.sort(list, Comparator.naturalOrder(), new ListSwapper<>());
+            qml += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " qml=" + qml / (i + 1));
+
+            plist = new PersistentList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedMPQ = quickSortMP.sort(plist, Comparator.naturalOrder(), new PersistentListSwapper<String>());
+            qmp += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " qmp=" + qmp / (i + 1));
+
+            tlist = new TransientList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedMTQ = quickSortMT.sort(tlist, Comparator.naturalOrder(), new TransientListSwapper<String>());
+            qmt += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " qmt=" + qmt / (i + 1));
+
+            if (! jlist.equals(sortedMListQ)) {
+                System.out.println("quicksort failed (M)");
+            }
+            if (! sortedList.equals(sortedMPQ) || ! sortedList.equals(sortedMTQ)) {
+                System.out.println("sortedMPQ or sortedMTQ differ for quicksort (M)");
             }
 
             list = new ArrayList<>(lines);

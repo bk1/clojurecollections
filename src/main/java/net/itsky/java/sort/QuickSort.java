@@ -55,7 +55,8 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L>, SortSubList<
                 if (len < 20) {
                     result = u - 1;
                 } else {
-                    List<Integer> indices = sortElementWithIdx2.sort(Arrays.asList(l, l + (len - 1) / 2, u - 1), idxComparator(list, comparator), swapInt);
+                    List<Integer> indices = Arrays.asList(l, l + (len - 1) / 2, u - 1);
+                    Collections.sort(indices, idxComparator(list, comparator));
                     result = indices.get(1);
                 }
                 break;
@@ -63,17 +64,21 @@ public class QuickSort<T, L extends List<T>> implements Sort<T, L>, SortSubList<
                 if (len < 20) {
                     result = u - 1;
                 } else if (len < 100) {
-                    List<Integer> indices = sortElementWithIdx2.sort(Arrays.asList(l, l + (len - 1) / 2, u - 1), idxComparator(list, comparator), swapInt);
+                    List<Integer> indices = Arrays.asList(l, l + (len - 1) / 2, u - 1);
+                    Collections.sort(indices, idxComparator(list, comparator));
                     result = indices.get(1);
                 } else {
-                    List<Integer> indices = sortElementWithIdx2.sort(Arrays.asList(l, l + (len - 1) / 4, l + (len - 1) / 2, l + 3 * (len - 1) / 4, u - 1), idxComparator(list, comparator), swapInt);
+                    List<Integer> indices = Arrays.asList(l, l + (len - 1) / 4, l + (len - 1) / 2, l + 3 * (len - 1) / 4, u - 1);
+                    Collections.sort(indices, idxComparator(list, comparator));
                     result = indices.get(2);
                 }
                 break;
             default:
                 throw new IllegalStateException("unsupported value for pivotStyle=" + pivotStyle);
         }
-        ;
+        if (result < l || result >= u) {
+            throw new IllegalStateException("pivot element idx=" + result + " not in [" + l + ", " + (u-1) + "]");
+        }
         return result;
     }
 
