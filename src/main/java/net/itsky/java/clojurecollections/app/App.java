@@ -11,7 +11,8 @@ import java.util.List;
 public class App {
 
     private static enum Operation {
-        ANALYZE,
+        ANALYZE_NUM,
+        ANALYZE_STR,
         LINE_SORT,
         NUM_SORT;
     }
@@ -61,9 +62,13 @@ public class App {
                 SortFileNumbers sortFileNumbers = new SortFileNumbers();
                 sortFileNumbers.sortFileContent(lines);
             }
-            case ANALYZE ->  {
-                Analyze analyze = new Analyze();
-                analyze.analyze(lines);
+            case ANALYZE_NUM ->  {
+                AnalyzeNum analyzeNum = new AnalyzeNum();
+                analyzeNum.analyze(lines);
+            }
+            case ANALYZE_STR ->  {
+                AnalyzeStr analyzeStr = new AnalyzeStr();
+                analyzeStr.analyze(lines);
             }
         }
     }
