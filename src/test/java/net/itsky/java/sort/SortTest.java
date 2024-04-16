@@ -2,14 +2,11 @@ package net.itsky.java.sort;
 
 import net.itsky.java.clojurecollections.PersistentList;
 import net.itsky.java.clojurecollections.TransientList;
-import org.eclipse.collections.api.factory.list.ImmutableListFactory;
-import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -361,39 +358,6 @@ public class SortTest {
         }
     }
 
-    private List<List<Integer>> createAllPermutations(int n) {
-        if (n < 0 || n > 13) {
-            throw new IllegalArgumentException("factorial of n fits into int for n=0,1,2,...13, but n=" + n);
-        }
-        long factorialL = LongStream.range(1L, n).reduce(1, (prod, i) -> prod * i);
-        int factorial = (int) factorialL;
-        if (factorialL != (long) factorial) {
-            throw new IllegalArgumentException("factorial of n fits into int for n=0,1,2,...12, but n=" + n);
-        }
-        int[] indexes = new int[n];
-        for (int i = 0; i < n; i++) {
-            indexes[i] = 0;
-        }
-        List<List<Integer>> result = new ArrayList<>(factorial);
-        ImmutableListFactory lf = new ImmutableListFactoryImpl();
-        ListSwapper<Integer> swapper = new ListSwapper<>();
-        List<Integer> elements = new ArrayList<>(IntStream.range(1, n + 1).boxed().toList());
-        result.add(lf.<Integer>withAll(elements).castToList());
-        int i = 0;
-        while (i < n) {
-            if (indexes[i] < i) {
-                swapper.swap(elements, (i & 0x01) == 0 ? 0 : indexes[i], i);
-                result.add(lf.withAll(elements).castToList());
-                indexes[i]++;
-                i = 0;
-            } else {
-                indexes[i] = 0;
-                i++;
-            }
-        }
-        return result;
-    }
-
 
     @Test
     public void testAllPermutations() {
@@ -403,7 +367,7 @@ public class SortTest {
         Sort<Integer, List<Integer>> parallelQuickSort = new ParallelQuickSort<>();
         ListSwapper<Integer> swapper = new ListSwapper<>();
         for (int n = 0; n <= 8; n++) {
-            List<List<Integer>> permutations = createAllPermutations(n);
+            List<List<Integer>> permutations = TestUtils.createAllPermutations(n);
             List<Integer> sorted = permutations.get(0);
             for (List<Integer> unsorted : permutations) {
                 assertEquals(sorted, heapSort.sort(new ArrayList<>(unsorted), Comparator.naturalOrder(), swapper), () -> "unsorted=" + unsorted);
