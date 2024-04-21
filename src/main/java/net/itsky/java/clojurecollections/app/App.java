@@ -68,7 +68,7 @@ public class App {
             }
             case ANALYZE_STR ->  {
                 AnalyzeStr analyzeStr = new AnalyzeStr();
-                analyzeStr.analyze(lines);
+                analyzeStr.analyzeFileContent(lines);
             }
         }
     }

@@ -2,8 +2,16 @@ package net.itsky.java.clojurecollections.app;
 
 import net.itsky.java.clojurecollections.PersistentList;
 import net.itsky.java.clojurecollections.TransientList;
+import net.itsky.java.clojurecollections.util.MetricDataForest;
+import net.itsky.java.clojurecollections.util.MetricDataHash;
+import net.itsky.java.clojurecollections.util.MetricDataOneChar;
+import net.itsky.java.clojurecollections.util.MetricDataTree;
 import net.itsky.java.sort.*;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,6 +55,32 @@ public class SortFileLines {
         SortMetricized<String, PersistentList<String>> defaultFlashSortP = new FlashSort<>();
         SortMetricized<String, TransientList<String>> defaultFlashSortT = new FlashSort<>();
 
+
+        MetricDataTree metricDataTree = new MetricDataTree();
+        MetricDataOneChar metricDataOneChar = new MetricDataOneChar();
+        MetricDataForest metricDataForest = new MetricDataForest();
+        try (InputStream stream = new FileInputStream("metric.dat")) {
+            metricDataTree.read(stream);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
+        System.out.println("metricDataTree ready");
+        try (InputStream stream = new FileInputStream("1c-metric.dat")) {
+            metricDataOneChar.read(stream);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
+        System.out.println("metricDataOneChar ready");
+        try (InputStream stream = new FileInputStream("metric.dat")) {
+            metricDataForest.read(stream);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
+        System.out.println("metricDataForest ready");
+
         long jl = 0;
         long hl = 0;
         long hp = 0;
@@ -75,6 +109,15 @@ public class SortFileLines {
         long fl = 0;
         long fp = 0;
         long ft = 0;
+        long fdl = 0;
+        long fdp = 0;
+        long fdt = 0;
+        long fel = 0;
+        long fep = 0;
+        long fet = 0;
+        long ffl = 0;
+        long ffp = 0;
+        long fft = 0;
 
         for (int i = 0; i < 10; i++) {
             List<String> jlist = new ArrayList<>(lines);
@@ -101,10 +144,10 @@ public class SortFileLines {
             ht += System.currentTimeMillis() - t0;
             System.out.println("i=" + i + " ht=" + ht / (i + 1));
 
-            if (! jlist.equals(sortedList)) {
+            if (!jlist.equals(sortedList)) {
                 System.out.println("heapsort failed");
             }
-            if (! sortedList.equals(sortedP) || ! sortedList.equals(sortedT)) {
+            if (!sortedList.equals(sortedP) || !sortedList.equals(sortedT)) {
                 System.out.println("sortedP or sortedT differ for heapsort");
             }
 
@@ -126,10 +169,10 @@ public class SortFileLines {
             tt += System.currentTimeMillis() - t0;
             System.out.println("i=" + i + " tt=" + tt / (i + 1));
 
-            if (! jlist.equals(sortedList)) {
+            if (!jlist.equals(sortedList)) {
                 System.out.println("ternary heapsort failed");
             }
-            if (! sortedList.equals(sortedP) || ! sortedList.equals(sortedT)) {
+            if (!sortedList.equals(sortedP) || !sortedList.equals(sortedT)) {
                 System.out.println("sortedP or sortedT differ for ternary heapsort");
             }
 
@@ -151,10 +194,10 @@ public class SortFileLines {
             q3t += System.currentTimeMillis() - t0;
             System.out.println("i=" + i + " q3t=" + q3t / (i + 1));
 
-            if (! jlist.equals(sorted3ListQ)) {
+            if (!jlist.equals(sorted3ListQ)) {
                 System.out.println("quicksort failed (3)");
             }
-            if (! sortedList.equals(sorted3PQ) || ! sortedList.equals(sorted3TQ)) {
+            if (!sortedList.equals(sorted3PQ) || !sortedList.equals(sorted3TQ)) {
                 System.out.println("sorted3PQ or sorted3TQ differ for quicksort (3)");
             }
 
@@ -177,10 +220,10 @@ public class SortFileLines {
             q5t += System.currentTimeMillis() - t0;
             System.out.println("i=" + i + " q5t=" + q5t / (i + 1));
 
-            if (! jlist.equals(sortedListQ)) {
+            if (!jlist.equals(sortedListQ)) {
                 System.out.println("quicksort failed (5)");
             }
-            if (! sortedList.equals(sortedPQ) || ! sortedList.equals(sortedTQ)) {
+            if (!sortedList.equals(sortedPQ) || !sortedList.equals(sortedTQ)) {
                 System.out.println("sortedPQ or sortedTQ differ for quicksort (5)");
             }
 
@@ -203,13 +246,12 @@ public class SortFileLines {
             qrt += System.currentTimeMillis() - t0;
             System.out.println("i=" + i + " qrt=" + qrt / (i + 1));
 
-            if (! jlist.equals(sortedRListQ)) {
+            if (!jlist.equals(sortedRListQ)) {
                 System.out.println("quicksort failed (R)");
             }
-            if (! sortedList.equals(sortedRPQ) || ! sortedList.equals(sortedRTQ)) {
+            if (!sortedList.equals(sortedRPQ) || !sortedList.equals(sortedRTQ)) {
                 System.out.println("sortedRPQ or sortedRTQ differ for quicksort (R)");
             }
-
 
 
             list = new ArrayList<>(lines);
@@ -230,10 +272,10 @@ public class SortFileLines {
             qmt += System.currentTimeMillis() - t0;
             System.out.println("i=" + i + " qmt=" + qmt / (i + 1));
 
-            if (! jlist.equals(sortedMListQ)) {
+            if (!jlist.equals(sortedMListQ)) {
                 System.out.println("quicksort failed (M)");
             }
-            if (! sortedList.equals(sortedMPQ) || ! sortedList.equals(sortedMTQ)) {
+            if (!sortedList.equals(sortedMPQ) || !sortedList.equals(sortedMTQ)) {
                 System.out.println("sortedMPQ or sortedMTQ differ for quicksort (M)");
             }
 
@@ -256,14 +298,12 @@ public class SortFileLines {
             System.out.println("i=" + i + " pt=" + pt
                     / (i + 1));
 
-            if (! jlist.equals(sortedListPQ)) {
+            if (!jlist.equals(sortedListPQ)) {
                 System.out.println("parallel quicksort failed");
             }
-            if (! sortedList.equals(sortedPPQ) || ! sortedList.equals(sortedTPQ)) {
+            if (!sortedList.equals(sortedPPQ) || !sortedList.equals(sortedTPQ)) {
                 System.out.println("sortedRPQ or sortedRTQ differ for parallel quicksort");
             }
-
-
 
 
             Metric<String> defaultMetric = new DefaultStringMetric();
@@ -287,15 +327,93 @@ public class SortFileLines {
             System.out.println("i=" + i + " ft=" + ft
                     / (i + 1));
 
-            if (! jlist.equals(sortedListF)) {
+            if (!jlist.equals(sortedListF)) {
                 System.out.println("flashSort failed");
                 //assertEquals(jlist, sortedListF);
 
             }
-            if (! sortedList.equals(sortedPF) || ! sortedList.equals(sortedTF)) {
+            if (!sortedList.equals(sortedPF) || !sortedList.equals(sortedTF)) {
                 System.out.println("sortedPF or sortedTF differ for flashsort");
             }
 
+
+            list = new ArrayList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedListFd = defaultFlashSortList.sort(list, Comparator.naturalOrder(), new ListSwapper<>(), metricDataTree);
+            fdl += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fdl =" + fdl / (i + 1));
+
+            plist = new PersistentList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedPFd = defaultFlashSortP.sort(plist, Comparator.naturalOrder(), new PersistentListSwapper<String>(), metricDataTree);
+            fdp += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fdp=" + fdp / (i + 1));
+
+            tlist = new TransientList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedTFd = defaultFlashSortT.sort(tlist, Comparator.naturalOrder(), new TransientListSwapper<String>(), metricDataTree);
+            fdt += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fdt=" + fdt
+                    / (i + 1));
+            if (!jlist.equals(sortedListFd)) {
+                System.out.println("flashSortd failed");
+            }
+            if (!sortedList.equals(sortedPFd) || !sortedList.equals(sortedTFd)) {
+                System.out.println("sortedPFd or sortedTFd differ for flashsortd");
+            }
+
+
+            list = new ArrayList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedListFe = defaultFlashSortList.sort(list, Comparator.naturalOrder(), new ListSwapper<>(), metricDataOneChar);
+            fel += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fel =" + fel / (i + 1));
+
+            plist = new PersistentList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedPFe = defaultFlashSortP.sort(plist, Comparator.naturalOrder(), new PersistentListSwapper<String>(), metricDataOneChar);
+            fep += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fep=" + fep / (i + 1));
+
+            tlist = new TransientList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedTFe = defaultFlashSortT.sort(tlist, Comparator.naturalOrder(), new TransientListSwapper<String>(), metricDataOneChar);
+            fet += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fet=" + fet / (i + 1));
+            if (!jlist.equals(sortedListFd)) {
+                System.out.println("flashSorte failed");
+            }
+            if (!sortedList.equals(sortedPFe) || !sortedList.equals(sortedTFe)) {
+                System.out.println("sortedPFe or sortedTFe differ for flashsorte");
+            }
+
+
+
+
+
+            list = new ArrayList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedListFf = defaultFlashSortList.sort(list, Comparator.naturalOrder(), new ListSwapper<>(), metricDataForest);
+            ffl += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " ffl =" + ffl / (i + 1));
+
+            plist = new PersistentList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedPFf = defaultFlashSortP.sort(plist, Comparator.naturalOrder(), new PersistentListSwapper<String>(), metricDataForest);
+            ffp += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " ffp=" + ffp / (i + 1));
+
+            tlist = new TransientList<>(lines);
+            t0 = System.currentTimeMillis();
+            List<String> sortedTFf = defaultFlashSortT.sort(tlist, Comparator.naturalOrder(), new TransientListSwapper<String>(), metricDataForest);
+            fft += System.currentTimeMillis() - t0;
+            System.out.println("i=" + i + " fft=" + fft / (i + 1));
+            if (!jlist.equals(sortedListFf)) {
+                System.out.println("flashSortf failed");
+            }
+            if (!sortedList.equals(sortedPFf) || !sortedList.equals(sortedTFf)) {
+                System.out.println("sortedPFf or sortedTFf differ for flashsortf");
+            }
 
 
         }

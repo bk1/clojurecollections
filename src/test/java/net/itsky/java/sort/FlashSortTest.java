@@ -2,16 +2,22 @@ package net.itsky.java.sort;
 
 import net.itsky.java.clojurecollections.PersistentList;
 import net.itsky.java.clojurecollections.TransientList;
+import net.itsky.java.clojurecollections.util.MetricDataForest;
+import net.itsky.java.clojurecollections.util.MetricDataOneChar;
+import net.itsky.java.clojurecollections.util.MetricDataTree;
 import org.eclipse.collections.api.factory.list.ImmutableListFactory;
 import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,6 +37,12 @@ public class FlashSortTest {
 
     private final Metric<String> defaultStringMetric = new DefaultStringMetric();
 
+    private static Metric<String> oneCharMetric;
+
+    private static Metric<String> treeMetric;
+
+    private static Metric<String> forestMetric;
+
     private final ListSwapper<Integer> intListSwapper = new ListSwapper<>();
     private final PersistentListSwapper<Integer> persistentIntListSwapper = new PersistentListSwapper<>();
 
@@ -42,55 +54,76 @@ public class FlashSortTest {
 
     private final Metric<Integer> defaultIntMetric = x -> x;
 
+    private final List<Metric<String>> metrics = List.of(defaultStringMetric, treeMetric, oneCharMetric, forestMetric);
+
+    @BeforeAll
+    static void initMetric() {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        MetricDataOneChar oneCharMetric = new MetricDataOneChar();
+        oneCharMetric.read(classLoader.getResourceAsStream("ukrainian-metric-1c.dat"));
+        FlashSortTest.oneCharMetric = oneCharMetric;
+        MetricDataTree treeMetric = new MetricDataTree();
+        treeMetric.read(classLoader.getResourceAsStream("ukrainian-metric.dat"));
+        FlashSortTest.treeMetric = treeMetric;
+        MetricDataForest forestMetric = new MetricDataForest();
+        forestMetric.read(classLoader.getResourceAsStream("ukrainian-metric.dat"));
+        FlashSortTest.forestMetric = forestMetric;
+    }
 
     @Test
     void testFlashSortAsiatic() {
-        List<String> unsortedList = new ArrayList<>(UNSORTED_ASIATIC);
-        PersistentList<String> unsortedP = new PersistentList<>(UNSORTED_ASIATIC);
-        TransientList<String> unsortedT = new TransientList<>(UNSORTED_ASIATIC);
+        metrics.stream().forEach(metric -> {
+            List<String> unsortedList = new ArrayList<>(ASIATIC_UNSORTED);
+            PersistentList<String> unsortedP = new PersistentList<>(ASIATIC_UNSORTED);
+            TransientList<String> unsortedT = new TransientList<>(ASIATIC_UNSORTED);
 
-        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), listSwapper, defaultStringMetric);
-        assertEquals(SORTED_ASIATIC, sortedList);
+            List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), listSwapper, metric);
+            assertEquals(ASIATIC_SORTED, sortedList);
 
-        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), persistentListSwapper, defaultStringMetric);
-        assertEquals(SORTED_ASIATIC, sortedP);
+            PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), persistentListSwapper, metric);
+            assertEquals(ASIATIC_SORTED, sortedP);
 
-        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), transientListSwapper, defaultStringMetric);
-        assertEquals(SORTED_ASIATIC, sortedT);
+            TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), transientListSwapper, metric);
+            assertEquals(ASIATIC_SORTED, sortedT);
+        });
     }
 
 
     @Test
     void testFlashSort() {
-        List<String> unsortedList = new ArrayList<>(UNSORTED);
-        PersistentList<String> unsortedP = new PersistentList<>(UNSORTED);
-        TransientList<String> unsortedT = new TransientList<>(UNSORTED);
+        metrics.stream().forEach(metric -> {
+            List<String> unsortedList = new ArrayList<>(UNSORTED);
+            PersistentList<String> unsortedP = new PersistentList<>(UNSORTED);
+            TransientList<String> unsortedT = new TransientList<>(UNSORTED);
 
-        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), listSwapper, defaultStringMetric);
-        assertEquals(SORTED, sortedList);
+            List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), listSwapper, metric);
+            assertEquals(SORTED, sortedList);
 
-        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), persistentListSwapper, defaultStringMetric);
-        assertEquals(SORTED, sortedP);
+            PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), persistentListSwapper, metric);
+            assertEquals(SORTED, sortedP);
 
-        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), transientListSwapper, defaultStringMetric);
-        assertEquals(SORTED, sortedT);
+            TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), transientListSwapper, metric);
+            assertEquals(SORTED, sortedT);
+        });
     }
 
     @Test
     void testFlashSortLong() {
-        List<String> unsortedList = new ArrayList<>(LONG_UNSORTED);
-        PersistentList<String> unsortedP = new PersistentList<>(LONG_UNSORTED);
-        TransientList<String> unsortedT = new TransientList<>(LONG_UNSORTED);
+        metrics.stream().forEach(metric -> {
+            List<String> unsortedList = new ArrayList<>(LONG_UNSORTED);
+            PersistentList<String> unsortedP = new PersistentList<>(LONG_UNSORTED);
+            TransientList<String> unsortedT = new TransientList<>(LONG_UNSORTED);
 
 
-        List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), listSwapper, defaultStringMetric);
-        assertEquals(LONG_SORTED, sortedList);
+            List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), listSwapper, metric);
+            assertEquals(LONG_SORTED, sortedList);
 
-        PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), persistentListSwapper, defaultStringMetric);
-        assertEquals(LONG_SORTED, sortedP);
+            PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), persistentListSwapper, metric);
+            assertEquals(LONG_SORTED, sortedP);
 
-        TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), transientListSwapper, defaultStringMetric);
-        assertEquals(LONG_SORTED, sortedT);
+            TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), transientListSwapper, metric);
+            assertEquals(LONG_SORTED, sortedT);
+        });
     }
 
     @Test
@@ -178,35 +211,43 @@ public class FlashSortTest {
     @Test
     public void testNumbers() {
         ListSwapper<String> swapper = new ListSwapper<>();
-        assertEquals(NUMBERS_SORTED, listSort.sort(new ArrayList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), listSwapper, defaultStringMetric), () -> "unsorted=" + NUMBERS_UNSORTED);
-        assertEquals(NUMBERS_SORTED, plistSort.sort(new PersistentList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), persistentListSwapper, defaultStringMetric), () -> "unsorted=" + NUMBERS_UNSORTED);
-        assertEquals(NUMBERS_SORTED, tlistSort.sort(new TransientList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), transientListSwapper, defaultStringMetric), () -> "unsorted=" + NUMBERS_UNSORTED);
+        metrics.stream().forEach(metric -> {
+            assertEquals(NUMBERS_SORTED, listSort.sort(new ArrayList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), listSwapper, metric), () -> "unsorted=" + NUMBERS_UNSORTED);
+            assertEquals(NUMBERS_SORTED, plistSort.sort(new PersistentList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), persistentListSwapper, metric), () -> "unsorted=" + NUMBERS_UNSORTED);
+            assertEquals(NUMBERS_SORTED, tlistSort.sort(new TransientList<>(NUMBERS_UNSORTED), Comparator.naturalOrder(), transientListSwapper, metric), () -> "unsorted=" + NUMBERS_UNSORTED);
+        });
     }
 
     @Test
     public void testLongNumbers() {
         ListSwapper<String> swapper = new ListSwapper<>();
-        assertEquals(NUMBERS_LONG_SORTED, listSort.sort(new ArrayList<>(NUMBERS_LONG_UNSORTED), Comparator.naturalOrder(), listSwapper, defaultStringMetric));
-        assertEquals(NUMBERS_LONG_SORTED, plistSort.sort(new PersistentList<>(NUMBERS_LONG_UNSORTED), Comparator.naturalOrder(), persistentListSwapper, defaultStringMetric));
-        assertEquals(NUMBERS_LONG_SORTED, tlistSort.sort(new TransientList<>(NUMBERS_LONG_UNSORTED), Comparator.naturalOrder(), transientListSwapper, defaultStringMetric));
+        metrics.stream().forEach(metric -> {
+            assertEquals(NUMBERS_LONG_SORTED, listSort.sort(new ArrayList<>(NUMBERS_LONG_UNSORTED), Comparator.naturalOrder(), listSwapper, metric));
+            assertEquals(NUMBERS_LONG_SORTED, plistSort.sort(new PersistentList<>(NUMBERS_LONG_UNSORTED), Comparator.naturalOrder(), persistentListSwapper, metric));
+            assertEquals(NUMBERS_LONG_SORTED, tlistSort.sort(new TransientList<>(NUMBERS_LONG_UNSORTED), Comparator.naturalOrder(), transientListSwapper, metric));
+        });
     }
 
 
     @Test
     public void testPrefixedNumbers() {
         ListSwapper<String> swapper = new ListSwapper<>();
-        assertEquals(NUMBERS_PREFIXED_SORTED, listSort.sort(new ArrayList<>(NUMBERS_PREFIXED_UNSORTED), Comparator.naturalOrder(), listSwapper, defaultStringMetric));
-        assertEquals(NUMBERS_PREFIXED_SORTED, plistSort.sort(new PersistentList<>(NUMBERS_PREFIXED_UNSORTED), Comparator.naturalOrder(), persistentListSwapper, defaultStringMetric));
-        assertEquals(NUMBERS_PREFIXED_SORTED, tlistSort.sort(new TransientList<>(NUMBERS_PREFIXED_UNSORTED), Comparator.naturalOrder(), transientListSwapper, defaultStringMetric));
+        metrics.stream().forEach(metric -> {
+            assertEquals(NUMBERS_PREFIXED_SORTED, listSort.sort(new ArrayList<>(NUMBERS_PREFIXED_UNSORTED), Comparator.naturalOrder(), listSwapper, metric));
+            assertEquals(NUMBERS_PREFIXED_SORTED, plistSort.sort(new PersistentList<>(NUMBERS_PREFIXED_UNSORTED), Comparator.naturalOrder(), persistentListSwapper, metric));
+            assertEquals(NUMBERS_PREFIXED_SORTED, tlistSort.sort(new TransientList<>(NUMBERS_PREFIXED_UNSORTED), Comparator.naturalOrder(), transientListSwapper, metric));
+        });
     }
 
 
     @Test
     public void testMixedPrefixedNumbers() {
         ListSwapper<String> swapper = new ListSwapper<>();
-        assertEquals(NUMBERS_MIXED_PREFIXED_SORTED, listSort.sort(new ArrayList<>(NUMBERS_MIXED_PREFIXED_UNSORTED), Comparator.naturalOrder(), listSwapper, defaultStringMetric));
-        assertEquals(NUMBERS_MIXED_PREFIXED_SORTED, plistSort.sort(new PersistentList<>(NUMBERS_MIXED_PREFIXED_UNSORTED), Comparator.naturalOrder(), persistentListSwapper, defaultStringMetric));
-        assertEquals(NUMBERS_MIXED_PREFIXED_SORTED, tlistSort.sort(new TransientList<>(NUMBERS_MIXED_PREFIXED_UNSORTED), Comparator.naturalOrder(), transientListSwapper, defaultStringMetric));
+        metrics.stream().forEach(metric -> {
+            assertEquals(NUMBERS_MIXED_PREFIXED_SORTED, listSort.sort(new ArrayList<>(NUMBERS_MIXED_PREFIXED_UNSORTED), Comparator.naturalOrder(), listSwapper, metric));
+            assertEquals(NUMBERS_MIXED_PREFIXED_SORTED, plistSort.sort(new PersistentList<>(NUMBERS_MIXED_PREFIXED_UNSORTED), Comparator.naturalOrder(), persistentListSwapper, metric));
+            assertEquals(NUMBERS_MIXED_PREFIXED_SORTED, tlistSort.sort(new TransientList<>(NUMBERS_MIXED_PREFIXED_UNSORTED), Comparator.naturalOrder(), transientListSwapper, metric));
+        });
     }
 
 }

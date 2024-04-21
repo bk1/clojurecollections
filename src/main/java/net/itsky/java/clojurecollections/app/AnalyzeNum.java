@@ -7,12 +7,15 @@ import org.eclipse.collections.api.map.primitive.MutableLongLongMap;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableIntLongMapFactoryImpl;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableLongLongMapFactoryImpl;
 
+import java.io.*;
 import java.util.List;
 
 public class AnalyzeNum {
 
     private static final int C = 1;
     private static final int M = 100;
+
+    private static final int ARR_SIZE = Character.MAX_VALUE + 1;
 
     private static final int BEGIN = 65536;
     private static final int END = 65537;
@@ -31,6 +34,32 @@ public class AnalyzeNum {
             line.chars().forEach(c -> {
                 singleMap.put(c, M + singleMap.getIfAbsent(c, C));
             });
+        }
+        long total = singleMap.sum() + ARR_SIZE - singleMap.size();
+        long keySum = singleMap.keySet().sum();
+        System.out.println("total=" + total + " keySum=" + keySum);
+        double factor = 2.0*Long.MAX_VALUE / total;
+        long[] singleList = new long[ARR_SIZE];
+        long subTotal = 0;
+        for (int ci = 0; ci < ARR_SIZE; ci++) {
+            long val = singleMap.getIfAbsent(ci, 1);
+            subTotal += val;
+            double metricDouble = subTotal * factor - Long.MAX_VALUE;
+            long metric = (long) metricDouble;
+            singleList[ci] = metric;
+        }
+
+        try (OutputStream stream = new FileOutputStream("1c-metric.dat")) {
+            try (BufferedOutputStream bs = new BufferedOutputStream(stream)) {
+                try (DataOutputStream ds = new DataOutputStream(bs)) {
+                    for (int ci = 0; ci < ARR_SIZE; ci++) {
+                        ds.writeLong(singleList[ci]);
+                    }
+                }
+            }
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
         }
         MutableIntLongMap doubleMap = factoryI.empty();
         for (String line : lines) {

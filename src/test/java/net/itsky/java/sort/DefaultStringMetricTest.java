@@ -1,23 +1,9 @@
 package net.itsky.java.sort;
 
-import net.itsky.java.clojurecollections.PersistentList;
-import net.itsky.java.clojurecollections.TransientList;
-import org.eclipse.collections.api.factory.list.ImmutableListFactory;
-import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.LongFunction;
-import java.util.function.ToLongFunction;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +15,7 @@ public class DefaultStringMetricTest {
 
     @Test
     void testMetric() {
-        List<List<String>> listOfLists = List.of(UNSORTED, LONG_UNSORTED,NUMBERS_UNSORTED,UNSORTED_ASIATIC);
+        List<List<String>> listOfLists = List.of(UNSORTED, LONG_UNSORTED,NUMBERS_UNSORTED, ASIATIC_UNSORTED);
         for (List<String> list : listOfLists) {
             for (String x : list) {
                 long xm = metric.metric(x);

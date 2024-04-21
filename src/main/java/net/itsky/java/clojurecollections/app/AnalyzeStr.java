@@ -1,5 +1,6 @@
 package net.itsky.java.clojurecollections.app;
 
+import net.itsky.java.clojurecollections.util.MetricDataTree;
 import org.eclipse.collections.api.factory.map.primitive.MutableIntLongMapFactory;
 import org.eclipse.collections.api.factory.map.primitive.MutableObjectLongMapFactory;
 import org.eclipse.collections.api.map.primitive.MutableIntLongMap;
@@ -8,9 +9,12 @@ import org.eclipse.collections.impl.map.mutable.primitive.MutableIntLongMapFacto
 import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectLongMapFactoryImpl;
 import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Comparator;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,10 +23,10 @@ public class AnalyzeStr {
     private static final int C = 1;
     private static final int M = 100;
 
-    private static final int MAX_SUB_WORD_LENGTH = 5;
-    private static final int MAX_SUB_WORD_LENGTH2 = 5;
+    private static final int MAX_SHORT_SUB_WORD_LENGTH = 5;
+    private static final int MAX_LONG_SUB_WORD_LENGTH = 10;
 
-    private static final int MIN_SUBWORD5_FREQ = 100;
+    private static final int MIN_SUBWORD5_FREQ = 100*M+C;
 
 
     private long lineCounter = 0;
@@ -80,7 +84,7 @@ public class AnalyzeStr {
         countWordS();
         int n = s.length();
         IntStream.range(0, n).forEach(lower -> {
-                    int nn = Math.min(n, lower+MAX_SUB_WORD_LENGTH);
+                    int nn = Math.min(n, lower+ MAX_SHORT_SUB_WORD_LENGTH);
                     IntStream.range(lower+1, nn).forEach(upper-> {
                         String subString = s.substring(lower, upper); // Nnew SubString(s, lower, upper);
                         subWordMap.put(subString, M+subWordMap.getIfAbsent(subString, C));
@@ -95,14 +99,14 @@ public class AnalyzeStr {
         countWordL();
         wordMap.put(s, M+wordMap.getIfAbsent(s, C));
         int n = s.length();
-        if (n < MAX_SUB_WORD_LENGTH+1) {
+        if (n < MAX_SHORT_SUB_WORD_LENGTH +1) {
             return;
         }
-        IntStream.range(0, n-MAX_SUB_WORD_LENGTH-1)
-                .filter(lower->subWordMap.getIfAbsent(s.substring(lower, lower+MAX_SUB_WORD_LENGTH), 0) > MIN_SUBWORD5_FREQ)
+        IntStream.range(0, n- MAX_SHORT_SUB_WORD_LENGTH -1)
+                .filter(lower->subWordMap.getIfAbsent(s.substring(lower, lower+ MAX_SHORT_SUB_WORD_LENGTH), 0) > MIN_SUBWORD5_FREQ)
                 .forEach(lower -> {
-                    int nn = Math.min(n, lower+MAX_SUB_WORD_LENGTH2);
-                    IntStream.range(lower+MAX_SUB_WORD_LENGTH+1, nn).forEach(upper-> {
+                    int nn = Math.min(n, lower+ MAX_LONG_SUB_WORD_LENGTH);
+                    IntStream.range(lower+ MAX_SHORT_SUB_WORD_LENGTH +1, nn).forEach(upper-> {
                         String subString = s.substring(lower, upper); // Nnew SubString(s, lower, upper);
                         subWordMap.put(subString, M+subWordMap.getIfAbsent(subString, C));
                     });
@@ -111,13 +115,13 @@ public class AnalyzeStr {
 
     }
 
-    private void analyzeIntervals(String s) {
+    private String analyzeIntervals(String s, int maxLeftOverSize) {
         countWordI();
         int n = s.length();
-        IntStream.range(0, n-1)
+        IntStream.range(0, n-maxLeftOverSize)
                 .forEach(lower -> {
-                            int nn = Math.min(n, lower+MAX_SUB_WORD_LENGTH2);
-                            String subString = s.substring(lower, nn);
+                            int upper = Math.min(n, lower+ MAX_LONG_SUB_WORD_LENGTH);
+                            String subString = s.substring(lower, upper);
                             StringInterval subInt = new StringInterval(subString, subString);
                             SortedMap<StringInterval, Long> tail = intervalMap.tailMap(subInt);
                             if (! tail.isEmpty()) {
@@ -126,10 +130,14 @@ public class AnalyzeStr {
                             }
                         }
                 );
-
+        if (n < maxLeftOverSize) {
+            return s;
+        } else {
+            return s.substring(n-maxLeftOverSize, n);
+        }
     }
 
-    public void analyze(List<String> lines) {
+    public void analyzeFileContent(List<String> lines) {
         lines.stream().map(line -> line+"\n").flatMapToInt(String::chars).forEach(c -> {
             charMap.put(c, M + charMap.getIfAbsent(c, C));
         });
@@ -163,24 +171,38 @@ public class AnalyzeStr {
 
         CharSequence lastCharSeq = subWordMap.keySet().stream().sorted().filter(s -> s.length() <= 1 || subWordMap.get(s) >= MIN_SUBWORD5_FREQ).reduce("", (previous, current) -> { StringInterval interval = new StringInterval(previous.toString(), current.toString()); intervalMap.put(interval, 1L);return current; });
         intervalMap.put(new StringInterval(lastCharSeq.toString(), "\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff"), 1L);
-        String r3 = lines.stream().map(line->line+"\n").reduce("", (leftoverWhiteSpace, line) -> {
+        String r3 = lines.stream().map(line->line+"\n").reduce("", (leftOver, line) -> {
             countLine();
-            String[] parts = (leftoverWhiteSpace + line).splitWithDelimiters("\\w+", 0);
-            int last = parts.length - 1;
-            Stream.of(parts).limit(last).filter(s-> !s.isEmpty()).map(String::intern).forEach(this::analyzeIntervals);
-            return parts[last];
+            return analyzeIntervals(leftOver+line, MAX_LONG_SUB_WORD_LENGTH-1);
         });
-        analyzeIntervals(r3);
+        analyzeIntervals(r3, 0);
 
+        SortedMap<String, Long> dataMap = new TreeSortedMap<>(Comparator.reverseOrder());
+        long total = intervalMap.values().stream().mapToLong(x->x.longValue()).sum();
+        double factor = 2.0*Long.MAX_VALUE / total;
+        System.out.println("total=" + total + " factor=" + factor);
         long subTotal = 0;
         long i = 0;
         for (SortedMap.Entry<StringInterval, Long> entry : intervalMap.reversed().entrySet()) {
             StringInterval key = entry.getKey();
             long value = entry.getValue();
             subTotal+= value;
-            System.out.println(String.format("%8d v=%8d s=%8d %s", i++, value, subTotal, key.toString()));
+            double metricDouble = subTotal * factor - Long.MAX_VALUE;
+            long metric = (long) metricDouble;
+            if (Math.abs(metric-metricDouble) >1000) {
+                System.out.println("metric=" + metric + " metricDouble=" + metricDouble);
+            }
+            dataMap.put(key.start(), metric);
+            System.out.println(String.format("%8d v=%8d m=%8d s=%8d %s", i++, value, metric, subTotal, key.toString()));
         }
-        System.out.println("intevalMap.size=" + intervalMap.size());
+        System.out.println("intervalMap.size=" + intervalMap.size());
+        try (OutputStream stream = new FileOutputStream("metric.dat")) {
+            MetricDataTree metricData = new MetricDataTree(dataMap);
+            metricData.write(stream);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
     }
 
     private String formatChars(long... cs) {
