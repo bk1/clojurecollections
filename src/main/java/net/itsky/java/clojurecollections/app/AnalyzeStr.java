@@ -1,6 +1,6 @@
 package net.itsky.java.clojurecollections.app;
 
-import net.itsky.java.clojurecollections.util.MetricDataTree;
+import net.itsky.java.sort.metric.MetricDataTree;
 import org.eclipse.collections.api.factory.map.primitive.MutableIntLongMapFactory;
 import org.eclipse.collections.api.factory.map.primitive.MutableObjectLongMapFactory;
 import org.eclipse.collections.api.map.primitive.MutableIntLongMap;

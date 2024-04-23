@@ -1,28 +1,28 @@
-package net.itsky.java.sort;
+package net.itsky.java.sort.metric;
 
+import net.itsky.java.sort.Metric;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static net.itsky.java.sort.TestData.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DefaultStringMetricTest {
+public class CyrillicStringMetricTest {
 
-    private static final Metric<String> metric = new DefaultStringMetric();
+    private static final Metric<String> metric = new CyrillicStringMetric();
 
     @Test
     void testMetric() {
-        List<List<String>> listOfLists = List.of(UNSORTED, LONG_UNSORTED,NUMBERS_UNSORTED, ASIATIC_UNSORTED);
+        List<List<String>> listOfLists = List.of(UNSORTED, LONG_UNSORTED,NUMBERS_UNSORTED, ASIATIC_UNSORTED, EXTREMES);
         for (List<String> list : listOfLists) {
             for (String x : list) {
                 long xm = metric.metric(x);
                 for (String y : list) {
                     long ym = metric.metric(y);
                     if (xm < ym) {
-                        assertTrue(x.compareTo(y) < 0, () -> "x=" + x + " y=" + y + " xm=" + xm + " ym=" + ym);
+                        assertTrue(x.compareTo(y) < 0, () -> "x=" + x + " y=" + y + " xm=" + xm + " ym=" + ym + " list=" + list);
                     } else if (xm > ym) {
                         assertTrue(x.compareTo(y) > 0, () -> "x=" + x + " y=" + y + " xm=" + xm + " ym=" + ym);
                     }

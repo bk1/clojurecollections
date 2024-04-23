@@ -1,4 +1,4 @@
-package net.itsky.java.clojurecollections.util;
+package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.Metric;
 import org.eclipse.collections.api.list.primitive.LongList;

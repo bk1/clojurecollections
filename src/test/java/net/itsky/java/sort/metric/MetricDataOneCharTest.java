@@ -1,47 +1,50 @@
-package net.itsky.java.sort;
+package net.itsky.java.sort.metric;
 
-import net.itsky.java.clojurecollections.util.MetricDataForest;
-import net.itsky.java.clojurecollections.util.MetricDataTree;
-import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
+import net.itsky.java.sort.metric.MetricDataOneChar;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.LongStream;
 
+import static net.itsky.java.sort.metric.MetricDataOneChar.ARR_SIZE;
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MetricDataForestTest {
+public class MetricDataOneCharTest {
 
-    private MetricDataForest metric = readUkrainianMetric();
+    private MetricDataOneChar metric = readUkrainianMetric();
 
     @Test
     void testWriteAndRead() throws IOException, InterruptedException {
-        MetricDataForest source = metric;
-        MetricDataForest target = new MetricDataForest();
-        PipedInputStream inputStream = new PipedInputStream();
-        PipedOutputStream outputStream = new PipedOutputStream();
-        outputStream.connect(inputStream);
-        Thread sourceThread = new Thread(() -> source.write(outputStream));
-        sourceThread.start();
-        target.read(inputStream);
-        sourceThread.join();
-        assertEquals(source.keys(), target.keys());
-        for (String s : source.keys()) {
-            assertEquals(source.metric(s), target.metric(s));
+        long[] arr = LongStream.range(0, ARR_SIZE).map(x-> {long xx = x - 32768;return xx*xx*xx - xx*xx + xx - 1;}).toArray();
+        MetricDataOneChar source = new MetricDataOneChar(arr);
+        MetricDataOneChar target = new MetricDataOneChar();
+        try (PipedInputStream inputStream = new PipedInputStream()) {
+            try (PipedOutputStream outputStream = new PipedOutputStream()) {
+                outputStream.connect(inputStream);
+                Thread sourceThread = new Thread(() -> source.write(outputStream));
+                sourceThread.start();
+                target.read(inputStream);
+                sourceThread.join();
+            }
+        }
+        for (int ci = 0; ci < ARR_SIZE; ci++) {
+            String s = String.valueOf((char) ci);
+            assertEquals(arr[ci], target.metric(s));
+            assertEquals(arr[ci], source.metric(s));
         }
     }
 
-    private MetricDataForest readUkrainianMetric() {
-        InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric.dat");
-        MetricDataForest result = new MetricDataForest();
-        result.read(stream);
-        return result;
+    private MetricDataOneChar readUkrainianMetric() {
+        try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric-1c.dat")) {
+            MetricDataOneChar result = new MetricDataOneChar();
+            result.read(stream);
+            return result;
+        } catch (IOException ioex) {
+            throw new UncheckedIOException(ioex);
+        }
     }
 
     private void checkConsistency(List<String> data) {
@@ -104,13 +107,18 @@ public class MetricDataForestTest {
     }
 
     @Test
-    void testConsistencyNumbersAsiaticUnsorted() {
+    void testConsistencyAsiaticUnsorted() {
         checkConsistency(ASIATIC_UNSORTED);
     }
 
     @Test
     void testConsistencyUkrainianUnsorted() {
         checkConsistency(UKRAINIAN_WORDS);
+    }
+
+    @Test
+    void testConsistencyExtremesUnsorted() {
+        checkConsistency(EXTREMES_UNSORTED);
     }
 
 }

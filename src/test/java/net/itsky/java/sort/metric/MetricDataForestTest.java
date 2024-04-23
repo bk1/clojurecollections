@@ -1,10 +1,6 @@
-package net.itsky.java.sort;
+package net.itsky.java.sort.metric;
 
-import net.itsky.java.clojurecollections.util.MetricDataHash;
-import org.eclipse.collections.api.factory.map.primitive.MutableObjectLongMapFactory;
-import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
-import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectLongMapFactoryImpl;
-import org.junit.jupiter.api.Disabled;
+import net.itsky.java.sort.metric.MetricDataForest;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -17,16 +13,14 @@ import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled
-public class MetricDataHashTest {
+public class MetricDataForestTest {
 
-    private static final MutableObjectLongMapFactory mapFactory = new MutableObjectLongMapFactoryImpl();
+    private MetricDataForest metric = readUkrainianMetric();
 
     @Test
     void testWriteAndRead() throws IOException, InterruptedException {
-        MutableObjectLongMap<String> map = mapFactory.of("A", 1, "B", 2, "C", 3, "D", 4);
-        MetricDataHash source = new MetricDataHash(map);
-        MetricDataHash target = new MetricDataHash();
+        MetricDataForest source = metric;
+        MetricDataForest target = new MetricDataForest();
         PipedInputStream inputStream = new PipedInputStream();
         PipedOutputStream outputStream = new PipedOutputStream();
         outputStream.connect(inputStream);
@@ -34,15 +28,15 @@ public class MetricDataHashTest {
         sourceThread.start();
         target.read(inputStream);
         sourceThread.join();
-        for (String s : map.keySet()) {
-            assertEquals(map.get(s), target.metric(s));
-            assertEquals(map.get(s), source.metric(s));
+        assertEquals(source.keys(), target.keys());
+        for (String s : source.keys()) {
+            assertEquals(source.metric(s), target.metric(s));
         }
     }
 
-    private MetricDataHash readUkrainianMetric() {
+    private MetricDataForest readUkrainianMetric() {
         InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric.dat");
-        MetricDataHash result = new MetricDataHash();
+        MetricDataForest result = new MetricDataForest();
         result.read(stream);
         return result;
     }
@@ -51,7 +45,6 @@ public class MetricDataHashTest {
         if (data.size() > 2000) {
             data = data.subList(0, 2000);
         }
-        MetricDataHash metric = readUkrainianMetric();
         for (String x: data) {
             long mx = metric.metric(x);
             for (String y:data) {
@@ -115,6 +108,16 @@ public class MetricDataHashTest {
     @Test
     void testConsistencyUkrainianUnsorted() {
         checkConsistency(UKRAINIAN_WORDS);
+    }
+
+    @Test
+    void testConsistencyExtremes() {
+        checkConsistency(EXTREMES);
+    }
+
+    @Test
+    void testConsistencyXy() {
+        checkConsistency(List.of("\u0000", "ÿ"));
     }
 
 }

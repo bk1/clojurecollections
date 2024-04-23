@@ -1,10 +1,6 @@
-package net.itsky.java.sort;
+package net.itsky.java.sort.metric;
 
-import net.itsky.java.clojurecollections.util.MetricDataHash;
-import net.itsky.java.clojurecollections.util.MetricDataTree;
-import org.eclipse.collections.api.factory.map.primitive.MutableObjectLongMapFactory;
-import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
-import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectLongMapFactoryImpl;
+import net.itsky.java.sort.metric.MetricDataTree;
 import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 import org.junit.jupiter.api.Test;
 
@@ -108,13 +104,15 @@ public class MetricDataTreeTest {
     }
 
     @Test
-    void testConsistencyNumbersAsiaticUnsorted() {
+    void testConsistencyAsiaticUnsorted() {
         checkConsistency(ASIATIC_UNSORTED);
     }
 
     @Test
-    void testConsistencyUkrainianUnsorted() {
-        checkConsistency(UKRAINIAN_WORDS);
+    void testConsistencyExtremesUnsorted() {
+        checkConsistency(EXTREMES_UNSORTED);
     }
+
+
 
 }

@@ -2,16 +2,15 @@ package net.itsky.java.clojurecollections.app;
 
 import net.itsky.java.clojurecollections.PersistentList;
 import net.itsky.java.clojurecollections.TransientList;
-import net.itsky.java.clojurecollections.util.MetricDataForest;
-import net.itsky.java.clojurecollections.util.MetricDataHash;
-import net.itsky.java.clojurecollections.util.MetricDataOneChar;
-import net.itsky.java.clojurecollections.util.MetricDataTree;
+import net.itsky.java.sort.metric.Utf16StringMetric;
+import net.itsky.java.sort.metric.MetricDataForest;
+import net.itsky.java.sort.metric.MetricDataOneChar;
+import net.itsky.java.sort.metric.MetricDataTree;
 import net.itsky.java.sort.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -306,7 +305,7 @@ public class SortFileLines {
             }
 
 
-            Metric<String> defaultMetric = new DefaultStringMetric();
+            Metric<String> defaultMetric = new Utf16StringMetric();
 
             list = new ArrayList<>(lines);
             t0 = System.currentTimeMillis();

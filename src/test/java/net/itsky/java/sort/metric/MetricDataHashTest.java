@@ -1,59 +1,57 @@
-package net.itsky.java.sort;
+package net.itsky.java.sort.metric;
 
-import net.itsky.java.clojurecollections.util.MetricDataOneChar;
-import net.itsky.java.clojurecollections.util.MetricDataTree;
-import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
+import net.itsky.java.sort.metric.MetricDataHash;
+import org.eclipse.collections.api.factory.map.primitive.MutableObjectLongMapFactory;
+import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
+import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectLongMapFactoryImpl;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.LongStream;
 
-import static net.itsky.java.clojurecollections.util.MetricDataOneChar.ARR_SIZE;
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MetricDataOneCharTest {
+@Disabled
+public class MetricDataHashTest {
 
-    private MetricDataOneChar metric = readUkrainianMetric();
+    private static final MutableObjectLongMapFactory mapFactory = new MutableObjectLongMapFactoryImpl();
 
     @Test
     void testWriteAndRead() throws IOException, InterruptedException {
-        long[] arr = LongStream.range(0, ARR_SIZE).map(x-> {long xx = x - 32768;return xx*xx*xx - xx*xx + xx - 1;}).toArray();
-        MetricDataOneChar source = new MetricDataOneChar(arr);
-        MetricDataOneChar target = new MetricDataOneChar();
-        try (PipedInputStream inputStream = new PipedInputStream()) {
-            try (PipedOutputStream outputStream = new PipedOutputStream()) {
-                outputStream.connect(inputStream);
-                Thread sourceThread = new Thread(() -> source.write(outputStream));
-                sourceThread.start();
-                target.read(inputStream);
-                sourceThread.join();
-            }
-        }
-        for (int ci = 0; ci < ARR_SIZE; ci++) {
-            String s = String.valueOf((char) ci);
-            assertEquals(arr[ci], target.metric(s));
-            assertEquals(arr[ci], source.metric(s));
+        MutableObjectLongMap<String> map = mapFactory.of("A", 1, "B", 2, "C", 3, "D", 4);
+        MetricDataHash source = new MetricDataHash(map);
+        MetricDataHash target = new MetricDataHash();
+        PipedInputStream inputStream = new PipedInputStream();
+        PipedOutputStream outputStream = new PipedOutputStream();
+        outputStream.connect(inputStream);
+        Thread sourceThread = new Thread(() -> source.write(outputStream));
+        sourceThread.start();
+        target.read(inputStream);
+        sourceThread.join();
+        for (String s : map.keySet()) {
+            assertEquals(map.get(s), target.metric(s));
+            assertEquals(map.get(s), source.metric(s));
         }
     }
 
-    private MetricDataOneChar readUkrainianMetric() {
-        try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric-1c.dat")) {
-            MetricDataOneChar result = new MetricDataOneChar();
-            result.read(stream);
-            return result;
-        } catch (IOException ioex) {
-            throw new UncheckedIOException(ioex);
-        }
+    private MetricDataHash readUkrainianMetric() {
+        InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric.dat");
+        MetricDataHash result = new MetricDataHash();
+        result.read(stream);
+        return result;
     }
 
     private void checkConsistency(List<String> data) {
         if (data.size() > 2000) {
             data = data.subList(0, 2000);
         }
+        MetricDataHash metric = readUkrainianMetric();
         for (String x: data) {
             long mx = metric.metric(x);
             for (String y:data) {
@@ -117,6 +115,11 @@ public class MetricDataOneCharTest {
     @Test
     void testConsistencyUkrainianUnsorted() {
         checkConsistency(UKRAINIAN_WORDS);
+    }
+
+    @Test
+    void testConsistencyExtremes() {
+        checkConsistency(EXTREMES);
     }
 
 }

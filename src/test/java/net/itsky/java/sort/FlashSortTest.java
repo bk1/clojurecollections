@@ -2,9 +2,10 @@ package net.itsky.java.sort;
 
 import net.itsky.java.clojurecollections.PersistentList;
 import net.itsky.java.clojurecollections.TransientList;
-import net.itsky.java.clojurecollections.util.MetricDataForest;
-import net.itsky.java.clojurecollections.util.MetricDataOneChar;
-import net.itsky.java.clojurecollections.util.MetricDataTree;
+import net.itsky.java.sort.metric.Utf16StringMetric;
+import net.itsky.java.sort.metric.MetricDataForest;
+import net.itsky.java.sort.metric.MetricDataOneChar;
+import net.itsky.java.sort.metric.MetricDataTree;
 import org.eclipse.collections.api.factory.list.ImmutableListFactory;
 import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +35,7 @@ public class FlashSortTest {
 
     private final SortMetricized<String, TransientList<String>> tlistSort = new FlashSort<>();
 
-    private final Metric<String> defaultStringMetric = new DefaultStringMetric();
+    private final Metric<String> defaultStringMetric = new Utf16StringMetric();
 
     private static Metric<String> oneCharMetric;
 

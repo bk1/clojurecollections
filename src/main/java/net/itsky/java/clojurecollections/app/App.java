@@ -13,6 +13,7 @@ public class App {
     private static enum Operation {
         ANALYZE_NUM,
         ANALYZE_STR,
+        FLASH_SORT,
         LINE_SORT,
         NUM_SORT;
     }
@@ -57,6 +58,10 @@ public class App {
             case LINE_SORT -> {
                 SortFileLines sortFileLines = new SortFileLines();
                 sortFileLines.sortFileContent(lines);
+            }
+            case FLASH_SORT -> {
+                FlashSortFileLines flashSortFileLines = new FlashSortFileLines();
+                flashSortFileLines.sortFileContent(lines);
             }
             case NUM_SORT -> {
                 SortFileNumbers sortFileNumbers = new SortFileNumbers();

@@ -1,4 +1,4 @@
-package net.itsky.java.clojurecollections.util;
+package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.Metric;
 import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
@@ -60,7 +60,13 @@ public class MetricDataForest implements Metric<String> {
         }
         for (int ci = 0; ci < LIST_SIZE; ci++) {
             String key = String.valueOf((char) ci);
-            long metric = map.getOrDefault(key, 1L);
+            SortedMap<String, Long> tailMap = map.tailMap(key);
+            final long metric;
+            if (tailMap.isEmpty()) {
+                metric = Long.MIN_VALUE;
+            } else {
+                metric = tailMap.firstEntry().getValue();
+            }
             LocalTree localTree = new LocalTree(metric, new TreeSortedMap<>(reverseOrder));
             if (list.size() <= ci) {
               list.add(localTree);

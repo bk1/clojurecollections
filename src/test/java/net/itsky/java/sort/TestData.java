@@ -3,27 +3,35 @@ package net.itsky.java.sort;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class TestData {
-    static final List<String> UNSORTED = List.of("FL8YPS", "6DSNQQ", "U419AB", "X82QVN", "CU25H4", "ZZCRWY");
+
+    private static final Random rand = new Random();
+    public static final List<String> UNSORTED = List.of("FL8YPS", "6DSNQQ", "U419AB", "X82QVN", "CU25H4", "ZZCRWY");
     static final List<String> SORTED = new ArrayList<>(UNSORTED);
-    static final List<String> LONG_UNSORTED = List.of("0H9Y41BL8WUQ", "7WPFZU00FHJQ", "D0OBE9SD6DPE", "AGBYG6MMCC9B", "E9SPYKWAITU9", "1VT6J5VSDMX9", "WSW1YJI40W8H", "378PPNCN6OW8", "JL819RD3CFTS", "C2YGBBGXXCBV", "KAGQZ7DY82WS", "C6N3W0RU4N5M", "XSJ9V3MN73TA", "8OPVKYG8JHYA", "UN0P5TKDEA05", "XP0KKYPUSTSF", "JS308V9PAJ2Z", "09NYKUUCTM5U", "AFID27K03CXA", "EPS16MESPLM7", "4FSSP0UJB6Q6", "FJG8FS1F2QXB", "L06RQWNPRFLJ", "TW9GAH01TK02", "2BSNA7IBHTRH", "H7IQKOMZ388X", "Y4B7SEEE5QMP", "C22P8R9UBPS7", "KVJE98AOILZ8", "LJLDM4AEA0AD", "1EVSCZGQ55MV", "E1LN8FRI5VNQ", "32NYE2DD9MBO", "OCKJPM3NKQ7P", "0IFOJ8OAY4H9", "5ERNL1PBOKOC", "76I2GY4KQOXP", "8EKLG4FQFU8K", "VP0J12B839EU", "94D3IKF9BITJ");
+    public static final List<String> LONG_UNSORTED = List.of("0H9Y41BL8WUQ", "7WPFZU00FHJQ", "D0OBE9SD6DPE", "AGBYG6MMCC9B", "E9SPYKWAITU9", "1VT6J5VSDMX9", "WSW1YJI40W8H", "378PPNCN6OW8", "JL819RD3CFTS", "C2YGBBGXXCBV", "KAGQZ7DY82WS", "C6N3W0RU4N5M", "XSJ9V3MN73TA", "8OPVKYG8JHYA", "UN0P5TKDEA05", "XP0KKYPUSTSF", "JS308V9PAJ2Z", "09NYKUUCTM5U", "AFID27K03CXA", "EPS16MESPLM7", "4FSSP0UJB6Q6", "FJG8FS1F2QXB", "L06RQWNPRFLJ", "TW9GAH01TK02", "2BSNA7IBHTRH", "H7IQKOMZ388X", "Y4B7SEEE5QMP", "C22P8R9UBPS7", "KVJE98AOILZ8", "LJLDM4AEA0AD", "1EVSCZGQ55MV", "E1LN8FRI5VNQ", "32NYE2DD9MBO", "OCKJPM3NKQ7P", "0IFOJ8OAY4H9", "5ERNL1PBOKOC", "76I2GY4KQOXP", "8EKLG4FQFU8K", "VP0J12B839EU", "94D3IKF9BITJ");
     static final List<String> LONG_SORTED = new ArrayList<>(LONG_UNSORTED);
-    static final List<String> NUMBERS_UNSORTED = IntStream.range(0, 1001).map(x -> (1 + x + x * x) % 1001).boxed().map(x -> String.format("%04d", x)).toList();
+    public static final List<String> NUMBERS_UNSORTED = IntStream.range(0, 1001).map(x -> (1 + x + x * x) % 1001).boxed().map(x -> String.format("%04d", x)).toList();
     static final List<String> NUMBERS_SORTED = new ArrayList<>(NUMBERS_UNSORTED);
-    static final List<String> NUMBERS_LONG_UNSORTED = LongStream.range(0, 1002003).map(x -> (1 + x + x * x + x * x * x) % 1002003004L).mapToObj(x -> String.format("%010d", x)).toList();
+    public static final List<String> NUMBERS_LONG_UNSORTED = LongStream.range(0, 1002003).map(x -> (1 + x + x * x + x * x * x) % 1002003004L).mapToObj(x -> String.format("%010d", x)).toList();
     static final List<String> NUMBERS_LONG_SORTED = new ArrayList<>(NUMBERS_LONG_UNSORTED);
-    static final List<String> NUMBERS_PREFIXED_UNSORTED = LongStream.range(0, 1002003).map(x -> (1 + x + x * x + x * x * x) % 1002003004L).mapToObj(x -> String.format("XYZ%010d", x)).toList();
-    static final List<String> NUMBERS_MIXED_PREFIXED_UNSORTED = NUMBERS_PREFIXED_UNSORTED.stream().flatMap(s -> Stream.of("XYZT" + s, "\ufedc\ufedb\ufeda\ufed9" + s)).toList();
+    public static final List<String> NUMBERS_PREFIXED_UNSORTED = LongStream.range(0, 1002003).map(x -> (1 + x + x * x + x * x * x) % 1002003004L).mapToObj(x -> String.format("XYZ%010d", x)).toList();
+    public static final List<String> NUMBERS_MIXED_PREFIXED_UNSORTED = NUMBERS_PREFIXED_UNSORTED.stream().flatMap(s -> Stream.of("XYZT" + s, "\ufedc\ufedb\ufeda\ufed9" + s)).toList();
     static final List<String> NUMBERS_MIXED_PREFIXED_SORTED = new ArrayList<>(NUMBERS_MIXED_PREFIXED_UNSORTED);
     static final List<String> NUMBERS_PREFIXED_SORTED = new ArrayList<>(NUMBERS_PREFIXED_UNSORTED);
-    static final List<String> ASIATIC_UNSORTED = List.of("A", "農林大臣", "", "B", "和田博雄", "", "C", "罗放", "", "D");
+    public static final List<String> ASIATIC_UNSORTED = List.of("A", "農林大臣", "", "B", "和田博雄", "", "C", "罗放", "", "D");
     static final List<String> ASIATIC_SORTED = new ArrayList<>(ASIATIC_UNSORTED);
 
-    static final List<String> UKRAINIAN_WORDS = List.of( "ще", "Намісник", "Архіви/ЦДАВО/5069/1", "Сторінка:Історія", "q3xkwgo6496mbzxwqtomkqdlbro5yyn", "демократія«,", "все", "я", "самого", "вояк",
+    public static final List<String> EXTREMES = createList(3, 0x00, 0x01, 0x7f, 0x80, 0xff, 0x100, 0x1ff, 0x200, 0x3ff, 0x400, 0x401, 0x4ff, 0x500, 0x501, 0xfeff, 0xff00, 0xfff0, 0xfff1, 0xfffc, 0xfffd, 0xfffe, 0xffff);
+
+    public static final List<String> EXTREMES_UNSORTED = EXTREMES.stream().map(s -> String.format("%8d %s", rand.nextInt(100_000_000), s)).sorted().map(s -> s.substring(9, s.length())).toList();
+    public static final List<String> EXTREMES_SORTED = new ArrayList<>(EXTREMES_UNSORTED);
+
+    public static final List<String> UKRAINIAN_WORDS = List.of( "ще", "Намісник", "Архіви/ЦДАВО/5069/1", "Сторінка:Історія", "q3xkwgo6496mbzxwqtomkqdlbro5yyn", "демократія«,", "все", "я", "самого", "вояк",
             "п'ятиріччі", "і", "ґанку", "наймички", "погоджувати", "закричала", "було", "собі", "України", "поляні", "коня", "перевірки.", "Держави", "мають", "він", "Чікаго:", "Дитячі", "не", "від",
             "на", "в", "—", "різьбарі,", "втікає", "перед", "нова", "нам", "Словник", "Гурский", "якого", "352868", "хто", "української", "саду,", "text/x-wiki", "Вертатись:", "з", "віддихав",
             "wikitext", "В.А.", "прилягають", "нашого", "Leh", "і", "скрикнула:", "спочиваючи.", "згадують", "не", "Мукачевому", "f45d891p6hb6bnty909gxw24fh2k9ky", "склався", "гуде",
@@ -83,6 +91,8 @@ public class TestData {
             "непокій.", "свобідний", "За", "журнальних", "органи", "й", "2022-08-24T15:16:21Z", "11101", "Вода", "зробити", "же", "і", "83245", "wikitext", "кахала.", "зерно", "сяючих", "очі.",
             "такихъ");
 
+
+
     static final List<String> UKRAINIAN_WORDS_SORTED = new ArrayList(UKRAINIAN_WORDS);
     
     static {
@@ -93,8 +103,34 @@ public class TestData {
         Collections.sort(NUMBERS_PREFIXED_SORTED);
         Collections.sort(NUMBERS_MIXED_PREFIXED_SORTED);
         Collections.sort(ASIATIC_SORTED);
+        Collections.sort(EXTREMES_SORTED);
         Collections.sort(UKRAINIAN_WORDS_SORTED);
 
+    }
+
+    static List<String> createList(int length, int... letters) {
+        List<String> result = new ArrayList<>();
+        int m = letters.length;
+        for (int n = 0; n <= length; n++) {
+            int[] idx = new int[n];
+            while (true) {
+                String str = IntStream.range(0, n).map(i -> idx[i]).map(j -> letters[j]).mapToObj(l -> String.valueOf((char) l)).reduce("", (s, c)-> s+c);
+                result.add(str);
+                boolean done = true;
+                for (int i = 0; i < n; i++) {
+                    idx[i]++;
+                    if (idx[i] < m) {
+                        done = false;
+                        break;
+                    }
+                    idx[i] = 0;
+                }
+                if (done) {
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }
 
