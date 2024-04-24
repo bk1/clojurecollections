@@ -31,6 +31,8 @@ public class TestData {
     public static final List<String> EXTREMES_UNSORTED = EXTREMES.stream().map(s -> String.format("%8d %s", rand.nextInt(100_000_000), s)).sorted().map(s -> s.substring(9, s.length())).toList();
     public static final List<String> EXTREMES_SORTED = new ArrayList<>(EXTREMES_UNSORTED);
 
+    public static final List<String> CYR_LAT_MIX = createList(3, 0x00, 0x01, 0x7f, 0x80, 0xff, 0x100, 0x1ff, 0x200, 0x3ff, 0x400, 0x401, 0x4ff, 0x500, 0x501);
+
     public static final List<String> UKRAINIAN_WORDS = List.of( "ще", "Намісник", "Архіви/ЦДАВО/5069/1", "Сторінка:Історія", "q3xkwgo6496mbzxwqtomkqdlbro5yyn", "демократія«,", "все", "я", "самого", "вояк",
             "п'ятиріччі", "і", "ґанку", "наймички", "погоджувати", "закричала", "було", "собі", "України", "поляні", "коня", "перевірки.", "Держави", "мають", "він", "Чікаго:", "Дитячі", "не", "від",
             "на", "в", "—", "різьбарі,", "втікає", "перед", "нова", "нам", "Словник", "Гурский", "якого", "352868", "хто", "української", "саду,", "text/x-wiki", "Вертатись:", "з", "віддихав",

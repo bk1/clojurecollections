@@ -4,9 +4,12 @@ import net.itsky.java.sort.Metric;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static net.itsky.java.sort.TestData.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CyrillicStringMetricTest {
@@ -52,5 +55,17 @@ public class CyrillicStringMetricTest {
         }
 
     }
- // ,
+
+    @Test
+    void testCoverageLatCyr() {
+        Set<Long> set = IntStream.concat(IntStream.range(0x000,0x100), IntStream.range(0x400, 0x500)).mapToLong(ci -> metric.metric(String.valueOf((char) ci))).boxed().collect(Collectors.toSet());
+        assertEquals(0x200, set.size());
+    }
+
+
+    @Test
+    void testCoverage() {
+        Set<Long> set = IntStream.range(0x000,0x500).mapToLong(ci -> metric.metric(String.valueOf((char) ci))).boxed().collect(Collectors.toSet());
+        assertEquals(0x500, set.size());
+    }
 }

@@ -19,6 +19,7 @@ public class FlashSortFileLines {
         MetricDataTree metricDataTree = new MetricDataTree();
         MetricDataOneChar metricDataOneChar = new MetricDataOneChar();
         MetricDataForest metricDataForest = new MetricDataForest();
+        MetricDataCyrForest metricDataCyrForest = new MetricDataCyrForest();
         try (InputStream stream = new FileInputStream("metric.dat")) {
             metricDataTree.read(stream);
         } catch (IOException ioex) {
@@ -40,8 +41,15 @@ public class FlashSortFileLines {
             ioex.printStackTrace();
         }
         System.out.println("metricDataForest ready");
+        try (InputStream stream = new FileInputStream("metric.dat")) {
+            metricDataCyrForest.read(stream);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
+        System.out.println("metricDataCyrForest ready");
 
-        Map<String, Metric<String>> metrics = Map.of("default", new Utf16StringMetric(), "cyrillic", new CyrillicStringMetric(), "tree", metricDataTree, "1c", metricDataOneChar, "forest", metricDataForest);
+        Map<String, Metric<String>> metrics = Map.of("default", new Utf16StringMetric(), "cyrillic", new CyrillicStringMetric(), "2bcyrillic", new Cyrillic2BlockStringMetric(), "tree", metricDataTree, "1c", metricDataOneChar, "forest", metricDataForest, "cyrforest", metricDataCyrForest);
         MutableObjectLongMap<String> timing = new ObjectLongHashMap<>();
         SortMetricized<String, List<String>> flashSort = new FlashSort<>();
 

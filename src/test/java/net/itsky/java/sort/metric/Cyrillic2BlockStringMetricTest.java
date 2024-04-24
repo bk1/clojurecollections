@@ -5,17 +5,18 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class Latin1StringMetricTest {
+public class Cyrillic2BlockStringMetricTest {
 
-    private static final Metric<String> metric = new Latin1StringMetric();
+    private static final Metric<String> metric = new Cyrillic2BlockStringMetric();
 
     @Test
     void testMetric() {
@@ -25,26 +26,12 @@ public class Latin1StringMetricTest {
                 long xm = metric.metric(x);
                 for (String y : list) {
                     long ym = metric.metric(y);
-                    Supplier<String> msg =  () -> "x=" + x + " y=" + y + " x[0]=" + (int) ((x+"0").charAt(0)) + " y[0]=" + (int) ((y+"0").charAt(0)) + " xm=" + xm + " ym=" + ym;
                     if (xm < ym) {
-                        assertTrue(x.compareTo(y) < 0, msg);
+                        assertTrue(x.compareTo(y) < 0, () -> "x=" + x + " y=" + y + " xm=" + xm + " ym=" + ym + " list=" + list);
                     } else if (xm > ym) {
-                        assertTrue(x.compareTo(y) > 0, msg);
+                        assertTrue(x.compareTo(y) > 0, () -> "x=" + x + " y=" + y + " xm=" + xm + " ym=" + ym);
                     }
                 }
-            }
-        }
-    }
-
-    @Test
-    void testMetricAboveLatin1() {
-        long m = metric.metric("\u0400");
-        for (int i = 0x0100; i <= 0xffff; i++) {
-            String si = String.valueOf((char) i);
-            assertEquals(m, metric.metric(si), () -> "si=" + si + " i=" + (int) si.charAt(0));
-            for (int j = 0; j <= 0x01ff; j++) {
-                String sj = String.valueOf((char) j);
-                assertEquals(m, metric.metric(si+sj));
             }
         }
     }
@@ -73,7 +60,7 @@ public class Latin1StringMetricTest {
 
     @Test
     void testCoverage() {
-        Set<Long> set = IntStream.range(0x000,0x100).mapToLong(ci -> metric.metric(String.valueOf((char) ci))).boxed().collect(Collectors.toSet());
-        assertEquals(0x100, set.size());
+        Set<Long> set = IntStream.concat(IntStream.range(0x000,0x100), IntStream.range(0x400, 0x500)).mapToLong(ci -> metric.metric(String.valueOf((char) ci))).boxed().collect(Collectors.toSet());
+        assertEquals(0x200, set.size());
     }
 }
