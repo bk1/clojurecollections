@@ -2,10 +2,7 @@ package net.itsky.java.sort;
 
 import net.itsky.java.clojurecollections.PersistentList;
 import net.itsky.java.clojurecollections.TransientList;
-import net.itsky.java.sort.metric.Utf16StringMetric;
-import net.itsky.java.sort.metric.MetricDataForest;
-import net.itsky.java.sort.metric.MetricDataOneChar;
-import net.itsky.java.sort.metric.MetricDataTree;
+import net.itsky.java.sort.metric.*;
 import org.eclipse.collections.api.factory.list.ImmutableListFactory;
 import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,13 +32,28 @@ public class FlashSortTest {
 
     private final SortMetricized<String, TransientList<String>> tlistSort = new FlashSort<>();
 
-    private final Metric<String> defaultStringMetric = new Utf16StringMetric();
+    private final Metric<String> utf16StringMetric = new Utf16StringMetric();
+
+    private static Metric<String> cyrillic2BlockMetric = new Cyrillic2BlockStringMetric();
+
+    private static Metric<String> cyrillicMetric = new CyrillicStringMetric();
+
+    private static Metric<String> latin1Metric = new Latin1StringMetric();
 
     private static Metric<String> oneCharMetric;
 
     private static Metric<String> treeMetric;
 
     private static Metric<String> forestMetric;
+
+    private static Metric<String> forestCyrMetric;
+
+    private static Metric<String> forestCyrArrMetric;
+
+    private static Metric<String> forestCyrMetricCached;
+
+    private static Metric<String> forestCyrMetric4;
+
 
     private final ListSwapper<Integer> intListSwapper = new ListSwapper<>();
     private final PersistentListSwapper<Integer> persistentIntListSwapper = new PersistentListSwapper<>();
@@ -54,7 +66,8 @@ public class FlashSortTest {
 
     private final Metric<Integer> defaultIntMetric = x -> x;
 
-    private final List<Metric<String>> metrics = List.of(defaultStringMetric, treeMetric, oneCharMetric, forestMetric);
+    private final List<Metric<String>> metrics = List.of(utf16StringMetric, cyrillic2BlockMetric, cyrillicMetric, latin1Metric,
+                        treeMetric, oneCharMetric, forestMetric, forestCyrMetric, forestCyrArrMetric, forestCyrMetricCached, forestCyrMetric4);
 
     @BeforeAll
     static void initMetric() {
@@ -68,6 +81,19 @@ public class FlashSortTest {
         MetricDataForest forestMetric = new MetricDataForest();
         forestMetric.read(classLoader.getResourceAsStream("ukrainian-metric.dat"));
         FlashSortTest.forestMetric = forestMetric;
+        MetricDataCyrForest forestCyrMetric = new MetricDataCyrForest();
+        forestCyrMetric.read(classLoader.getResourceAsStream("ukrainian-metric.dat"));
+        FlashSortTest.forestCyrMetric = forestCyrMetric;
+        MetricDataCyrArrForest forestCyrArrMetric = new MetricDataCyrArrForest();
+        forestCyrArrMetric.read(classLoader.getResourceAsStream("ukrainian-metric.dat"));
+        FlashSortTest.forestCyrArrMetric = forestCyrArrMetric;
+        MetricDataCyrForestCached forestCyrMetricCached = new MetricDataCyrForestCached();
+        forestCyrMetricCached.read(classLoader.getResourceAsStream("ukrainian-metric.dat"));
+        FlashSortTest.forestCyrMetricCached = forestCyrMetricCached;
+        MetricDataCyrForest4 forestCyrMetric4 = new MetricDataCyrForest4();
+        forestCyrMetric4.read(classLoader.getResourceAsStream("ukrainian-metric.dat"), classLoader.getResourceAsStream("ukrainian-frequencies.dat"));
+        FlashSortTest.forestCyrMetric4 = forestCyrMetric4;
+
     }
 
     @Test

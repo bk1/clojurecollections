@@ -1,35 +1,33 @@
 package net.itsky.java.sort.metric;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.util.List;
 
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MetricDataCyrForestTest {
+public class MetricDataCyrForest4Test {
 
-    private MetricDataCyrForest metric = readUkrainianMetric();
+    private MetricDataCyrForest4 metric = readUkrainianMetric();
 
     @Test
     void testWriteAndRead() throws IOException, InterruptedException {
-        MetricDataCyrForest source = metric;
-        MetricDataCyrForest target = new MetricDataCyrForest();
-        try (PipedInputStream inputStream = new PipedInputStream()) {
-            try (PipedOutputStream outputStream = new PipedOutputStream()) {
-                outputStream.connect(inputStream);
-                Thread sourceThread = new Thread(() -> source.write(outputStream));
-                sourceThread.start();
-                Thread targetThread = new Thread(() -> target.read(inputStream));
-                targetThread.start();
-                sourceThread.join();
-                targetThread.join();
+        MetricDataCyrForest4 source = metric;
+        MetricDataCyrForest4 target = new MetricDataCyrForest4();
+        try (InputStream frequencyStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-frequencies.dat")) {
+            try (PipedInputStream inputStream = new PipedInputStream()) {
+                try (PipedOutputStream outputStream = new PipedOutputStream()) {
+                    outputStream.connect(inputStream);
+                    Thread sourceThread = new Thread(() -> source.write(outputStream));
+                    sourceThread.start();
+                    Thread targetThread = new Thread(() -> target.read(inputStream, frequencyStream));
+                    targetThread.start();
+                    sourceThread.join();
+                    targetThread.join();
+                }
             }
         }
         assertEquals(source.keys(), target.keys());
@@ -38,10 +36,15 @@ public class MetricDataCyrForestTest {
         }
     }
 
-    private MetricDataCyrForest readUkrainianMetric() {
-        InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric.dat");
-        MetricDataCyrForest result = new MetricDataCyrForest();
-        result.read(stream);
+    private MetricDataCyrForest4 readUkrainianMetric()  {
+        MetricDataCyrForest4 result = new MetricDataCyrForest4();
+        try (InputStream metricStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric.dat")) {
+            try (InputStream frequencyStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-frequencies.dat")) {
+                result.read(metricStream, frequencyStream);
+            }
+        } catch (IOException ioex) {
+            throw new UncheckedIOException(ioex);
+        }
         return result;
     }
 

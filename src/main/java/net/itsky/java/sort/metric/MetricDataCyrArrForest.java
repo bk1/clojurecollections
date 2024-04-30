@@ -11,7 +11,7 @@ import java.util.SortedMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class MetricDataCyrForest implements Metric<String> {
+public class MetricDataCyrArrForest implements Metric<String> {
 
     private static final int LIST_SIZE = Character.MAX_VALUE+1;
 
@@ -25,7 +25,7 @@ public class MetricDataCyrForest implements Metric<String> {
     private static final int ABOVE = 0x500;
 
 
-    public record LocalTree(long metricOneChar, long metricBetween, long metricAbove, List<LocalTree> latBlock, List<LocalTree> cyrBlock) {
+    public record LocalTree(long metricOneChar, long metricBetween, long metricAbove, LocalTree[] latBlock, LocalTree[] cyrBlock) {
         public long metric(String s) {
             if (s.isEmpty() || latBlock == null && cyrBlock == null) {
                 return metricOneChar;
@@ -33,19 +33,19 @@ public class MetricDataCyrForest implements Metric<String> {
             char c = s.charAt(0);
             String t = s.substring(1);
             if (c < LAT_BLOCK_UPPER && latBlock != null) {
-                return latBlock.get(c).metric(t);
+                return latBlock[c].metric(t);
             }
             if (c < CYR_BLOCK_LOWER) {
                 return metricBetween;
             }
-            if (c < CYR_BLOCK_UPPER && cyrBlock != null) {
-                return cyrBlock.get(c-CYR_BLOCK_LOWER).metric(t);
+            if (CYR_BLOCK_LOWER <= c && c < CYR_BLOCK_UPPER && cyrBlock != null) {
+                return cyrBlock[c-CYR_BLOCK_LOWER].metric(t);
             }
             return metricAbove;
         }
     }
 
-    private final List<LocalTree> list = new ArrayList<>(LIST_SIZE);
+    private final LocalTree[] list = new LocalTree[LIST_SIZE];
 
     private static final Comparator<String> reverseOrder = Comparator.reverseOrder();
 
@@ -75,25 +75,21 @@ public class MetricDataCyrForest implements Metric<String> {
             long metricAbove = getMetric(map, key+String.valueOf((char)ABOVE));
             final LocalTree localTree;
             if (ci <= LAT_BLOCK_UPPER || CYR_BLOCK_LOWER <= ci  && ci < CYR_BLOCK_UPPER) {
-                List<LocalTree> latBlock = IntStream.range(LAT_BLOCK_LOWER, LAT_BLOCK_UPPER)
+                LocalTree[] latBlock = IntStream.range(LAT_BLOCK_LOWER, LAT_BLOCK_UPPER)
                         .mapToObj(di -> key + String.valueOf((char) di))
                         .map(key2 -> getMetric(map, key2))
                         .map(m -> new LocalTree(m, m, m, null, null))
-                        .toList();
-                List<LocalTree> cyrBlock = IntStream.range(CYR_BLOCK_LOWER, CYR_BLOCK_UPPER)
+                        .toArray(LocalTree[]::new);
+                LocalTree[] cyrBlock = IntStream.range(CYR_BLOCK_LOWER, CYR_BLOCK_UPPER)
                         .mapToObj(di -> key + String.valueOf((char) di))
                         .map(key2 -> getMetric(map, key2))
                         .map(m -> new LocalTree(m, m, m, null, null))
-                        .toList();
+                        .toArray(LocalTree[]::new);
                 localTree = new LocalTree(metric, metricBetween, metricAbove, latBlock, cyrBlock);
             } else {
                 localTree = new LocalTree(metric, metric, metric,null, null);
             }
-            if (list.size() <= ci) {
-                list.add(localTree);
-            } else {
-                list.set(ci, localTree);
-            }
+            list[ci] = localTree;
         }
         System.out.println("read");
     }
@@ -104,7 +100,7 @@ public class MetricDataCyrForest implements Metric<String> {
             try (DataOutputStream ds = new DataOutputStream(bs)) {
                 for (int ci = 0; ci < LIST_SIZE; ci++) {
                     String s1 = String.valueOf((char) ci);
-                    LocalTree localTree = list.get(ci);
+                    LocalTree localTree = list[ci];
                     ds.writeUTF(s1);
                     ds.writeLong(localTree.metricOneChar);
                     IntStream.concat(IntStream.range(LAT_BLOCK_LOWER, LAT_BLOCK_UPPER+1), IntStream.range(CYR_BLOCK_LOWER-1, CYR_BLOCK_UPPER+1))
@@ -143,7 +139,7 @@ public class MetricDataCyrForest implements Metric<String> {
         }
         int ci = s.charAt(0);
         String t = s.substring(1);
-        return list.get(ci).metric(t);
+        return list[ci].metric(t);
     }
 
     public List<String> keys() {

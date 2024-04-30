@@ -28,17 +28,9 @@ public class MetricDataForest implements Metric<String> {
         }
     }
 
-    private final List<LocalTree> list;
+    private final List<LocalTree> list = new ArrayList<>(LIST_SIZE);
 
     private static final Comparator<String> reverseOrder = Comparator.reverseOrder();
-
-    public MetricDataForest() {
-        list = new ArrayList<>(LIST_SIZE);
-    }
-
-    public MetricDataForest(List<LocalTree> list) {
-        this.list = list;
-    }
 
     public void read(InputStream stream) {
         SortedMap<String, Long> map = new TreeSortedMap<>(reverseOrder);

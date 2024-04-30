@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestUtils {
     static <T> void assertBigListsEqual(List<T> l1, List<T> l2) {
@@ -63,5 +64,39 @@ public class TestUtils {
             }
         }
         return result;
+    }
+
+    public static void checkConsistencyLong(List<String> data, Metric<String> metric, int n) {
+        IntStream.range(n, data.size() - n-1)
+                .mapToObj(i -> IntStream.rangeClosed(-n, n).map(j->i+j).mapToObj(data::get).toList())
+                .forEach(list->checkConsistency(list, metric));
+    }
+
+    public static void checkConsistency(List<String> data, Metric<String> metric) {
+
+        if (data.size() > 2000) {
+            data = data.subList(0, 2000);
+        }
+        for (String x: data) {
+            long mx = metric.metric(x);
+            for (String y:data) {
+                if (x.equals(y)) {
+                    continue;
+                }
+                long my = metric.metric(y);
+                String msg = "x=" + x + " y=" + y + " mx=" + mx + " my=" + my;
+                if (mx < my) {
+                    assertTrue(x.compareTo(y) < 0, msg);
+                } else if (mx > my) {
+                    assertTrue(x.compareTo(y) > 0, msg);
+                }
+                if (x.equals(y)) {
+                    assertEquals(mx, my, msg);
+                }
+                if (x.compareTo(y) == 0) {
+                    assertEquals(mx, my, msg);
+                }
+            }
+        }
     }
 }

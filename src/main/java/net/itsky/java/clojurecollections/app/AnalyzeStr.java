@@ -1,5 +1,6 @@
 package net.itsky.java.clojurecollections.app;
 
+import clojure.lang.IFn;
 import net.itsky.java.sort.metric.MetricDataTree;
 import org.eclipse.collections.api.factory.map.primitive.MutableIntLongMapFactory;
 import org.eclipse.collections.api.factory.map.primitive.MutableObjectLongMapFactory;
@@ -9,11 +10,10 @@ import org.eclipse.collections.impl.map.mutable.primitive.MutableIntLongMapFacto
 import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectLongMapFactoryImpl;
 import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -28,11 +28,15 @@ public class AnalyzeStr {
 
     private static final int MIN_SUBWORD5_FREQ = 100*M+C;
 
+    private static final int MAX_FREQ_LENGTH = 6;
+
 
     private long lineCounter = 0;
     private long wordCounterS = 0;
     private long wordCounterL = 0;
     private long wordCounterI = 0;
+
+    record KeyValue(String key, long value) {};
 
     record StringInterval(String start, String end) implements Comparable<StringInterval> {
         @Override
@@ -169,6 +173,7 @@ public class AnalyzeStr {
         System.out.println("subWordMap1.size=" + subWordMapSize1);
         System.out.println("subWordMap2.size=" + subWordMap.size());"x".toString();
 
+
         CharSequence lastCharSeq = subWordMap.keySet().stream().sorted().filter(s -> s.length() <= 1 || subWordMap.get(s) >= MIN_SUBWORD5_FREQ).reduce("", (previous, current) -> { StringInterval interval = new StringInterval(previous.toString(), current.toString()); intervalMap.put(interval, 1L);return current; });
         intervalMap.put(new StringInterval(lastCharSeq.toString(), "\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff\uffff"), 1L);
         String r3 = lines.stream().map(line->line+"\n").reduce("", (leftOver, line) -> {
@@ -199,6 +204,30 @@ public class AnalyzeStr {
         try (OutputStream stream = new FileOutputStream("metric.dat")) {
             MetricDataTree metricData = new MetricDataTree(dataMap);
             metricData.write(stream);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
+        try (OutputStream stream = new FileOutputStream("frequencies.dat")) {
+            try (BufferedOutputStream bs = new BufferedOutputStream(stream)) {
+                try (DataOutputStream ds = new DataOutputStream(bs)) {
+                    subWordMap.keySet()
+                            .stream()
+                            .filter(k -> subWordMap.getIfAbsent(k, 0) > MIN_SUBWORD5_FREQ)
+                            .filter(k->k.length() <= MAX_FREQ_LENGTH)
+                            .map(k -> new KeyValue(k.toString(), subWordMap.getIfAbsent(k, 0)))
+                            .forEach(kv -> {
+                                try {
+                                    ds.writeUTF(kv.key());
+                                    ds.writeLong(kv.value());
+                                } catch (IOException ioex) {
+                                    throw new UncheckedIOException(ioex);
+                                }
+                            });
+
+
+                }
+            }
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             ioex.printStackTrace();

@@ -1,6 +1,7 @@
 package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.Metric;
+import net.itsky.java.sort.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -21,18 +22,7 @@ public class Latin1StringMetricTest {
     void testMetric() {
         List<List<String>> listOfLists = List.of(UNSORTED, LONG_UNSORTED,NUMBERS_UNSORTED, ASIATIC_UNSORTED, EXTREMES);
         for (List<String> list : listOfLists) {
-            for (String x : list) {
-                long xm = metric.metric(x);
-                for (String y : list) {
-                    long ym = metric.metric(y);
-                    Supplier<String> msg =  () -> "x=" + x + " y=" + y + " x[0]=" + (int) ((x+"0").charAt(0)) + " y[0]=" + (int) ((y+"0").charAt(0)) + " xm=" + xm + " ym=" + ym;
-                    if (xm < ym) {
-                        assertTrue(x.compareTo(y) < 0, msg);
-                    } else if (xm > ym) {
-                        assertTrue(x.compareTo(y) > 0, msg);
-                    }
-                }
-            }
+            TestUtils.checkConsistency(list, metric);
         }
     }
 

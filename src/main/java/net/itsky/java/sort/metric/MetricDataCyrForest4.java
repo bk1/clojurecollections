@@ -1,6 +1,9 @@
 package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.Metric;
+import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
+import org.eclipse.collections.api.map.primitive.ObjectLongMap;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectLongHashMap;
 import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
 import java.io.*;
@@ -11,9 +14,12 @@ import java.util.SortedMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class MetricDataCyrForest implements Metric<String> {
+public class MetricDataCyrForest4 implements Metric<String> {
 
+    private static final int DEPTH = 4;
     private static final int LIST_SIZE = Character.MAX_VALUE+1;
+
+    private static final long MIN_FREQUENCY = 100_1000;
 
     private static final int LAT_BLOCK_LOWER = 0x000;
     private static final int LAT_BLOCK_UPPER = 0x100;
@@ -49,14 +55,14 @@ public class MetricDataCyrForest implements Metric<String> {
 
     private static final Comparator<String> reverseOrder = Comparator.reverseOrder();
 
-    public void read(InputStream stream) {
+    public void read(InputStream metricStream, InputStream frequenciesStream) {
         System.out.println("reading");
         SortedMap<String, Long> map = new TreeSortedMap<>(reverseOrder);
-        try (BufferedInputStream bs = new BufferedInputStream(stream)) {
+        try (BufferedInputStream bs = new BufferedInputStream(metricStream)) {
             try (DataInputStream ds = new DataInputStream(bs)) {
                 while (true) {
                     try {
-                        String key = ds.readUTF();
+                        String key = ds.readUTF().intern();
                         long val = ds.readLong();
                         map.put(key, val);
                     } catch (EOFException eof) {
@@ -68,23 +74,59 @@ public class MetricDataCyrForest implements Metric<String> {
             System.out.println("ioex=" + ioex);
             throw new UncheckedIOException(ioex);
         }
+        MutableObjectLongMap<String> frequencies = new ObjectLongHashMap<>(map.size());
+        long sum[] = new long[DEPTH+2];
+        int count[] = new int[DEPTH+2];
+        try (BufferedInputStream bs = new BufferedInputStream(frequenciesStream)) {
+            try (DataInputStream ds = new DataInputStream(bs)) {
+                while (true) {
+                    try {
+                        String key0 = ds.readUTF();
+                        long val = ds.readLong();
+                        if (key0.length() <= DEPTH && val >= MIN_FREQUENCY) {
+                            String key = key0.intern();
+                            frequencies.put(key, val);
+                            count[key.length()]++;
+                            sum[key.length()]+=val;
+                        }
+                    } catch (EOFException eof) {
+                        break;
+                    }
+                }
+            }
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            throw new UncheckedIOException(ioex);
+        }
+        for (int i = 0; i < DEPTH+2; i++) {
+            System.out.println("key.length=" + i + " count=" + count[i] + " sum=" + sum[i] + (count[i] == 0 ? "" : (" avg=" + sum[i]/count[i])));
+        }
         for (int ci = 0; ci < LIST_SIZE; ci++) {
             String key = String.valueOf((char) ci);
             long metric = getMetric(map, key);
             long metricBetween = getMetric(map, key+String.valueOf((char) BETWEEN));
             long metricAbove = getMetric(map, key+String.valueOf((char)ABOVE));
             final LocalTree localTree;
+            /*
+MIN_FREQ=1:
+key.length=0 count=0 sum=0
+key.length=1 count=264 sum=12920747364 avg=48942224
+key.length=2 count=5009 sum=11887353709 avg=2373198
+key.length=3 count=69309 sum=11153963409 avg=160930
+key.length=4 count=77263 sum=9239434663 avg=119584
+key.length=5 count=0 sum=0
+
+MIN_FREQ=100_000:
+key.length=0 count=0 sum=0
+key.length=1 count=135 sum=12902727335 avg=95575758
+key.length=2 count=1055 sum=10713014855 avg=10154516
+key.length=3 count=2098 sum=7377040098 avg=3516225
+key.length=4 count=1314 sum=3247249914 avg=2471270
+key.length=5 count=0 sum=0
+             */
             if (ci <= LAT_BLOCK_UPPER || CYR_BLOCK_LOWER <= ci  && ci < CYR_BLOCK_UPPER) {
-                List<LocalTree> latBlock = IntStream.range(LAT_BLOCK_LOWER, LAT_BLOCK_UPPER)
-                        .mapToObj(di -> key + String.valueOf((char) di))
-                        .map(key2 -> getMetric(map, key2))
-                        .map(m -> new LocalTree(m, m, m, null, null))
-                        .toList();
-                List<LocalTree> cyrBlock = IntStream.range(CYR_BLOCK_LOWER, CYR_BLOCK_UPPER)
-                        .mapToObj(di -> key + String.valueOf((char) di))
-                        .map(key2 -> getMetric(map, key2))
-                        .map(m -> new LocalTree(m, m, m, null, null))
-                        .toList();
+                List<LocalTree> latBlock = createLatBlock(key, map, frequencies, DEPTH-1);
+                List<LocalTree> cyrBlock = createCyrBlock(key, map, frequencies, DEPTH-1);
                 localTree = new LocalTree(metric, metricBetween, metricAbove, latBlock, cyrBlock);
             } else {
                 localTree = new LocalTree(metric, metric, metric,null, null);
@@ -97,6 +139,33 @@ public class MetricDataCyrForest implements Metric<String> {
         }
         System.out.println("read");
     }
+
+    private List<LocalTree> createLatBlock(String parentKey, SortedMap<String, Long> map, ObjectLongMap<String> frequencyMap, int remainingDepth) {
+        return createBlock(parentKey, map, frequencyMap, remainingDepth, LAT_BLOCK_LOWER, LAT_BLOCK_UPPER);
+    }
+
+    private List<LocalTree> createCyrBlock(String parentKey, SortedMap<String, Long> map, ObjectLongMap<String> frequencyMap, int remainingDepth) {
+        return createBlock(parentKey, map, frequencyMap, remainingDepth, CYR_BLOCK_LOWER, CYR_BLOCK_UPPER);
+    }
+
+    private List<LocalTree> createBlock(String parentKey, SortedMap<String, Long> map, ObjectLongMap<String> frequencyMap, int remainingDepth, int blockLower, int blockUpper) {
+        List<LocalTree> result = new ArrayList<>(blockUpper - blockLower);
+        for (int i = blockLower; i < blockUpper; i++) {
+            String key = parentKey + (char) i;
+            long metric = getMetric(map, key);
+            if (remainingDepth <= 0 || frequencyMap.getIfAbsent(key, 0) < MIN_FREQUENCY) {
+                result.add(new LocalTree(metric, metric, metric, null, null));
+            } else {
+                long metricBetween = getMetric(map, key + (char) BETWEEN);
+                long metricAbove = getMetric(map, key + (char) ABOVE);
+                result.add(new LocalTree(metric, metricBetween, metricAbove,
+                        createLatBlock(key, map, frequencyMap, remainingDepth -1),
+                        createCyrBlock(key, map, frequencyMap, remainingDepth -1)));
+            }
+        }
+        return result;
+    }
+
 
     public void write(OutputStream stream) {
         System.out.println("writing");

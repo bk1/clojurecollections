@@ -1,6 +1,7 @@
 package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.Metric;
+import net.itsky.java.sort.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -22,17 +23,7 @@ public class Cyrillic2BlockStringMetricTest {
     void testMetric() {
         List<List<String>> listOfLists = List.of(UNSORTED, LONG_UNSORTED,NUMBERS_UNSORTED, ASIATIC_UNSORTED, EXTREMES);
         for (List<String> list : listOfLists) {
-            for (String x : list) {
-                long xm = metric.metric(x);
-                for (String y : list) {
-                    long ym = metric.metric(y);
-                    if (xm < ym) {
-                        assertTrue(x.compareTo(y) < 0, () -> "x=" + x + " y=" + y + " xm=" + xm + " ym=" + ym + " list=" + list);
-                    } else if (xm > ym) {
-                        assertTrue(x.compareTo(y) > 0, () -> "x=" + x + " y=" + y + " xm=" + xm + " ym=" + ym);
-                    }
-                }
-            }
+            TestUtils.checkConsistency(list, metric);
         }
     }
 

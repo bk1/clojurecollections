@@ -20,6 +20,10 @@ public class FlashSortFileLines {
         MetricDataOneChar metricDataOneChar = new MetricDataOneChar();
         MetricDataForest metricDataForest = new MetricDataForest();
         MetricDataCyrForest metricDataCyrForest = new MetricDataCyrForest();
+        MetricDataCyrForestCached metricDataCyrForestCached = new MetricDataCyrForestCached();
+        MetricDataCyrArrForest metricDataCyrArrForest = new MetricDataCyrArrForest();
+        MetricDataCyrForest4 metricDataCyrForest4 = new MetricDataCyrForest4();
+
         try (InputStream stream = new FileInputStream("metric.dat")) {
             metricDataTree.read(stream);
         } catch (IOException ioex) {
@@ -48,8 +52,29 @@ public class FlashSortFileLines {
             ioex.printStackTrace();
         }
         System.out.println("metricDataCyrForest ready");
+        try (InputStream stream = new FileInputStream("metric.dat")) {
+            metricDataCyrForestCached.read(stream);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
+        System.out.println("metricDataCyrForestCached ready");
+        try (InputStream stream = new FileInputStream("metric.dat")) {
+            metricDataCyrArrForest.read(stream);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
+        System.out.println("metricDataCyrArrForest ready");
+        try (InputStream stream = new FileInputStream("metric.dat"); InputStream stream2 = new FileInputStream("frequencies.dat")) {
+            metricDataCyrForest4.read(stream, stream2);
+        } catch (IOException ioex) {
+            System.out.println("ioex=" + ioex);
+            ioex.printStackTrace();
+        }
+        System.out.println("metricDataCyrArrForest ready");
 
-        Map<String, Metric<String>> metrics = Map.of("default", new Utf16StringMetric(), "cyrillic", new CyrillicStringMetric(), "2bcyrillic", new Cyrillic2BlockStringMetric(), "tree", metricDataTree, "1c", metricDataOneChar, "forest", metricDataForest, "cyrforest", metricDataCyrForest);
+        Map<String, Metric<String>> metrics = Map.of("default", new Utf16StringMetric(), "cyrillic", new CyrillicStringMetric(), "2bcyrillic", new Cyrillic2BlockStringMetric(), "tree", metricDataTree, "1c", metricDataOneChar, "forest", metricDataForest, "cyrforest", metricDataCyrForest, "cyrforestcached", metricDataCyrForestCached, "cyrarrforest", metricDataCyrArrForest, "cyrforest4" , metricDataCyrForest4);
         MutableObjectLongMap<String> timing = new ObjectLongHashMap<>();
         SortMetricized<String, List<String>> flashSort = new FlashSort<>();
 
