@@ -127,7 +127,7 @@ public class MetricDataCyrArrForest implements Metric<String> {
     private static long getMetric(SortedMap<String, Long> map, String key) {
         SortedMap<String, Long> tailMap = map.tailMap(key);
         if (tailMap.isEmpty()) {
-            return Long.MIN_VALUE;
+            return 0L;
         } else {
             return tailMap.firstEntry().getValue();
         }
@@ -135,7 +135,7 @@ public class MetricDataCyrArrForest implements Metric<String> {
 
     public long metric(String s) {
         if (s == null|| s.isEmpty()) {
-            return Long.MIN_VALUE;
+            return 0L;
         }
         int ci = s.charAt(0);
         String t = s.substring(1);

@@ -73,7 +73,7 @@ public class MetricDataOneChar implements Metric<String> {
 
     public long metric(String s) {
         if (s == null || s.isEmpty()) {
-            return Long.MIN_VALUE;
+            return 0L;
         }
         char c = s.charAt(0);
         return singleCharList[c];

@@ -37,6 +37,7 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
         if (sortWholeList) {
             tm = 0;
             th = 0;
+            System.out.println("\n---------------------------------------");
         }
         int aSizeTotal = list.size();
         if (begin < 0 || end > aSizeTotal || begin > end) {
@@ -72,27 +73,21 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
                 mMax = mi;
             }
         }
-        boolean scale = mMin < HALF_MIN_VALUE || mMax > HALF_MAX_VALUE;
-        final long mMinScaled = scale ? mMin >> 1 : mMin;
-        final long mMaxScaled = scale ? mMax >> 1 : mMax;
-        if (mMinScaled == mMaxScaled) {
+        if (mMin == mMax) {
             // min and max are the same --> already sorted
             t0 = currentTimeMillis();
             list = terneryHeapSort.sort(list, comparator, swapper, begin, end);
             th += currentTimeMillis()-t0;
             return list;
         }
-        final double step = (lSize - 1) / (double) (mMaxScaled - mMinScaled);
+        final double step = (lSize - 1) / (double) (mMax - mMin);
 
         // count the elements in each of the lSize classes
         for (int i = begin; i < end; i++) {
             t0 = currentTimeMillis();
             long metricAtI = metric.metric(list.get(i));
-            if (scale) {
-                metricAtI>>=1;
-            }
             tm += currentTimeMillis() - t0;
-            int k = fsortCalculateK(metricAtI - mMinScaled, step, lSize);
+            int k = fsortCalculateK(metricAtI - mMin, step, lSize);
             l[k]++;
         }
 
@@ -119,20 +114,14 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
                 t0= currentTimeMillis();
                 long metricAtJ = metric.metric(list.get(j));
                 tm += currentTimeMillis()-t0;
-                if (scale) {
-                    metricAtJ>>=1;
-                }
-                k = fsortCalculateK(metricAtJ - mMinScaled, step, lSize);
+                k = fsortCalculateK(metricAtJ - mMin, step, lSize);
             }
             /* now: j < l[k] */
             while (j != l[k]) {
                 t0= currentTimeMillis();
                 long metricAtJ = metric.metric(list.get(j));
                 tm += currentTimeMillis()-t0;
-                if (scale) {
-                    metricAtJ>>=1;
-                }
-                k = fsortCalculateK(metricAtJ - mMinScaled, step, lSize);
+                k = fsortCalculateK(metricAtJ - mMin, step, lSize);
                 int idx = l[k] - 1;
                 list = swapper.swap(list, j, idx);
                 l[k]--;
@@ -148,15 +137,15 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
         int classesBelowLimit = 0;
         int classesAboveLimit = 0;
         double avgClassSize = 0;
-        if (sortWholeList && lSize > 0) {
-            avgClassSize = (end - begin) / lSize;
+        if (sortWholeList && lSize > 0 && classSizeCount > 0) {
+            avgClassSize = (end - begin) / classSizeCount;
         }
         /* use fsort or qsort or hsort for each class */
         for (k = 0; k < lSize; k++) {
             int lower = ll[k];
             int upper = ll[k + 1];
             int classSize = upper - lower;
-            if (classSize > 0) {
+            if (classSize > 0 && sortWholeList) {
                 classSizeCount++;
                 int log = (int)Math.log10(classSize);
                 classCategories[log]++;
@@ -178,15 +167,26 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
                 maxClassMin = list.get(lower);
                 maxClassMax = list.get(upper-1);
             }
+            if (classSize > 100000 && sortWholeList) {
+                T classMin = list.get(lower);
+                T classMax = list.get(upper-1);
+                long mmin = metric.metric(classMin);
+                long mmax = metric.metric(classMax);
+                int kmin = fsortCalculateK(mmin - mMin, step, lSize);
+                int kmax = fsortCalculateK(mmax - mMin, step, lSize);
+                double delta = (mmax - mmin) * step;
+                if (! classMin.equals(classMax)) {
+                    System.out.println("classSize=" + classSize + " delta=" + delta + " kmin=" + kmin + " kmax=" + kmax + " mmin=" + mmin + " mmax=" +mmax + " minT=" + classMin + " maxT=" + classMax);
+                }
+            }
         }
         if (sortWholeList) {
-            System.out.println("\n---------------------------------------");
             System.out.println("tm=" + tm + " th=" + th + " minCS=" + minClassSize + " maxCS=" + maxClassSize + " avgCS=" + avgClassSize + " nCS=" + classSizeCount + " nCSbl=" + classesBelowLimit + " nCSal=" + classesAboveLimit + " mMin="+mMin + " mMax=" + mMax + " step=" + step);
             for (int i = 0; i <classCategories.length; i++) {
                 System.out.print(" cc[" + i + "]=" + classCategories[i]);
             }
             System.out.println();
-            System.out.println("mMin=" + mMin + " mMax=" + mMax + " mMinScaled=" + mMinScaled + " mMaxScaled=" + mMaxScaled + " step=" + step + " lSize=" + lSize + " aSize=" + aSize);
+            System.out.println("mMin=" + mMin + " mMax=" + mMax + " mMin=" + mMin + " mMax=" + mMax + " step=" + step + " lSize=" + lSize + " aSize=" + aSize);
             System.out.println("m=" + metric.metric(maxClassMin) + " maxClassMin=" + maxClassMin);
             System.out.println("m=" + metric.metric(maxClassMax) + " maxClassMax=" + maxClassMax);
         }

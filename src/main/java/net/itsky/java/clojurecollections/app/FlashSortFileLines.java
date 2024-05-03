@@ -86,6 +86,7 @@ public class FlashSortFileLines {
             Collections.sort(jlist);
             long t = timing.getIfAbsent("jlist", 0L)+System.currentTimeMillis()-t0;
             timing.put("jlist", t);
+            System.out.println("\n---------------------------");
             System.out.println("i=" + i + " jlist: t=" + t / (i + 1));
 
             for (String name : metrics.keySet()) {

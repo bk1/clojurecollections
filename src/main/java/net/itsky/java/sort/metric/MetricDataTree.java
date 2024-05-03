@@ -55,11 +55,11 @@ public class MetricDataTree implements Metric<String> {
 
     public long metric(String s) {
         if (s == null) {
-            return Long.MIN_VALUE;
+            return 0L;
         }
         SortedMap<String, Long> tailMap = map.tailMap(s);
         if (tailMap.isEmpty()) {
-            return Long.MIN_VALUE;
+            return 0L;
         }
         return tailMap.firstEntry().getValue();
     }

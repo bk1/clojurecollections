@@ -26,6 +26,6 @@ public class Cyrillic2BlockStringMetric implements Metric<String> {
                 result += c;
             }
         }
-        return result += Long.MIN_VALUE;
+        return result;
     }
 }

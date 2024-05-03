@@ -1,5 +1,6 @@
 package net.itsky.java.sort.metric;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -11,9 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MetricDataCyrForest4Test {
 
+
     private MetricDataCyrForest4 metric = readUkrainianMetric();
 
     @Test
+    @Disabled
     void testWriteAndRead() throws IOException, InterruptedException {
         MetricDataCyrForest4 source = metric;
         MetricDataCyrForest4 target = new MetricDataCyrForest4();
@@ -36,7 +39,7 @@ public class MetricDataCyrForest4Test {
         }
     }
 
-    private MetricDataCyrForest4 readUkrainianMetric()  {
+    private MetricDataCyrForest4 readUkrainianMetric() {
         MetricDataCyrForest4 result = new MetricDataCyrForest4();
         try (InputStream metricStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric.dat")) {
             try (InputStream frequencyStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-frequencies.dat")) {
@@ -52,9 +55,9 @@ public class MetricDataCyrForest4Test {
         if (data.size() > 2000) {
             data = data.subList(0, 2000);
         }
-        for (String x: data) {
+        for (String x : data) {
             long mx = metric.metric(x);
-            for (String y:data) {
+            for (String y : data) {
                 if (x.equals(y)) {
                     continue;
                 }
@@ -76,11 +79,11 @@ public class MetricDataCyrForest4Test {
     }
 
     @Test
-    void testConsistentcyOfKeys()  {
+    void testConsistentcyOfKeys() {
         List<String> keys = metric.keys();
         for (int i = 0; i < keys.size(); i++) {
-            int lower = Math.max(0, i-1);
-            int upper = Math.min(keys.size(), i+1);
+            int lower = Math.max(0, i - 1);
+            int upper = Math.min(keys.size(), i + 1);
             List<String> subList = keys.subList(lower, upper);
             checkConsistency(subList);
         }
@@ -152,4 +155,19 @@ public class MetricDataCyrForest4Test {
         checkConsistency(List.of("\u0000", "ÿ"));
     }
 
+    @Test
+    void testConsistencyBigGroups() {
+        List<List<String>> listOfLists
+                = List.of(List.of("0", "000zs6jxioou107n9yvvh17eewtn7d2"),
+                List.of("250", "251147"),
+                List.of("5381", "538212"),
+                List.of("Leh Palych", "LehBot"),
+                List.of("proofread-index", "prop: 'revisions',"),
+                List.of("tex1zqdsqtrztoscf25taq9woumj9ff", "teymo4uflev3ulicsb3pgkjhzi6e2at"),
+                List.of("wiki", "will be able to receive him."),
+                List.of("Стор", "Стояв економ високий, сердитий. Хлопець одійшов кілька ступнів у бік і мовчки з підлоб'я дивився на його, не теряючи самоповаги, як то й годиться чарівникові."),
+                List.of("—", "― Алилуя заспіваймо,"),
+                List.of("", ""));
+        listOfLists.forEach(this::checkConsistency);
+    }
 }

@@ -19,7 +19,6 @@ public class Latin1StringMetric implements Metric<String> {
                 result += c+1;
             }
         }
-        result += Long.MIN_VALUE;
         return result;
     }
 }

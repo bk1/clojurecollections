@@ -51,7 +51,7 @@ public class MetricDataHash implements Metric<String> {
                 final long val;
                 SortedMap<String, Long> tailMap = sortedMap.tailMap(cs);
                 if (tailMap.isEmpty()) {
-                    val = Long.MIN_VALUE;
+                    val = 0L;
                 } else {
                     val = tailMap.firstEntry().getValue();
                 }
@@ -76,7 +76,7 @@ public class MetricDataHash implements Metric<String> {
 
     public long metric(String s) {
         if (s == null || s.isEmpty()) {
-            return Long.MIN_VALUE;
+            return 0L;
         }
         int n = Math.min(s.length(), MAX_SUB_WORD_LENGTH);
         for (int i = n; i > 0; i--) {
@@ -85,6 +85,6 @@ public class MetricDataHash implements Metric<String> {
                 return map.get(key);
             }
         }
-        return Long.MIN_VALUE;
+        return 0L;
     }
 }

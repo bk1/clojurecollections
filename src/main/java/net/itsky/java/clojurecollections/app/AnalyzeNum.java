@@ -38,13 +38,13 @@ public class AnalyzeNum {
         long total = singleMap.sum() + ARR_SIZE - singleMap.size();
         long keySum = singleMap.keySet().sum();
         System.out.println("total=" + total + " keySum=" + keySum);
-        double factor = 2.0*Long.MAX_VALUE / total;
+        double factor = Long.MAX_VALUE / total;
         long[] singleList = new long[ARR_SIZE];
         long subTotal = 0;
         for (int ci = 0; ci < ARR_SIZE; ci++) {
             long val = singleMap.getIfAbsent(ci, 1);
             subTotal += val;
-            double metricDouble = subTotal * factor - Long.MAX_VALUE;
+            double metricDouble = subTotal * factor;
             long metric = (long) metricDouble;
             singleList[ci] = metric;
         }

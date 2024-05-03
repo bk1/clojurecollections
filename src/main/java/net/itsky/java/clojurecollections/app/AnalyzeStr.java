@@ -1,6 +1,5 @@
 package net.itsky.java.clojurecollections.app;
 
-import clojure.lang.IFn;
 import net.itsky.java.sort.metric.MetricDataTree;
 import org.eclipse.collections.api.factory.map.primitive.MutableIntLongMapFactory;
 import org.eclipse.collections.api.factory.map.primitive.MutableObjectLongMapFactory;
@@ -13,20 +12,20 @@ import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 import java.io.*;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class AnalyzeStr {
 
-    private static final int C = 1;
-    private static final int M = 100;
+    private static final int MIN_VAL = 1;
+    private static final int NORMAL_VAL = 100;
+    private static final int START_VAL = 1000;
 
     private static final int MAX_SHORT_SUB_WORD_LENGTH = 5;
     private static final int MAX_LONG_SUB_WORD_LENGTH = 10;
 
-    private static final int MIN_SUBWORD5_FREQ = 100*M+C;
+    private static final int MIN_SUBWORD5_FREQ = 100* NORMAL_VAL + MIN_VAL;
 
     private static final int MAX_FREQ_LENGTH = 6;
 
@@ -88,10 +87,11 @@ public class AnalyzeStr {
         countWordS();
         int n = s.length();
         IntStream.range(0, n).forEach(lower -> {
+                    long val = lower == 0 ? START_VAL : NORMAL_VAL;
                     int nn = Math.min(n, lower+ MAX_SHORT_SUB_WORD_LENGTH);
                     IntStream.range(lower+1, nn).forEach(upper-> {
                         String subString = s.substring(lower, upper); // Nnew SubString(s, lower, upper);
-                        subWordMap.put(subString, M+subWordMap.getIfAbsent(subString, C));
+                        subWordMap.put(subString, val +subWordMap.getIfAbsent(subString, MIN_VAL));
                     });
                 }
 
@@ -101,7 +101,7 @@ public class AnalyzeStr {
 
     private void analyzeLongSubWords(String s) {
         countWordL();
-        wordMap.put(s, M+wordMap.getIfAbsent(s, C));
+        wordMap.put(s, NORMAL_VAL +wordMap.getIfAbsent(s, MIN_VAL));
         int n = s.length();
         if (n < MAX_SHORT_SUB_WORD_LENGTH +1) {
             return;
@@ -109,10 +109,11 @@ public class AnalyzeStr {
         IntStream.range(0, n- MAX_SHORT_SUB_WORD_LENGTH -1)
                 .filter(lower->subWordMap.getIfAbsent(s.substring(lower, lower+ MAX_SHORT_SUB_WORD_LENGTH), 0) > MIN_SUBWORD5_FREQ)
                 .forEach(lower -> {
+                    long val = lower == 0 ? START_VAL : NORMAL_VAL;
                     int nn = Math.min(n, lower+ MAX_LONG_SUB_WORD_LENGTH);
                     IntStream.range(lower+ MAX_SHORT_SUB_WORD_LENGTH +1, nn).forEach(upper-> {
                         String subString = s.substring(lower, upper); // Nnew SubString(s, lower, upper);
-                        subWordMap.put(subString, M+subWordMap.getIfAbsent(subString, C));
+                        subWordMap.put(subString, val +subWordMap.getIfAbsent(subString, MIN_VAL));
                     });
                 }
         );
@@ -143,7 +144,7 @@ public class AnalyzeStr {
 
     public void analyzeFileContent(List<String> lines) {
         lines.stream().map(line -> line+"\n").flatMapToInt(String::chars).forEach(c -> {
-            charMap.put(c, M + charMap.getIfAbsent(c, C));
+            charMap.put(c, NORMAL_VAL + charMap.getIfAbsent(c, MIN_VAL));
         });
         String r1 = lines.stream().map(line->line+"\n").reduce("", (leftoverWhiteSpace, line) -> {
             countLine();
@@ -184,7 +185,7 @@ public class AnalyzeStr {
 
         SortedMap<String, Long> dataMap = new TreeSortedMap<>(Comparator.reverseOrder());
         long total = intervalMap.values().stream().mapToLong(x->x.longValue()).sum();
-        double factor = 2.0*Long.MAX_VALUE / total;
+        double factor = Long.MAX_VALUE / total;
         System.out.println("total=" + total + " factor=" + factor);
         long subTotal = 0;
         long i = 0;
@@ -192,7 +193,7 @@ public class AnalyzeStr {
             StringInterval key = entry.getKey();
             long value = entry.getValue();
             subTotal+= value;
-            double metricDouble = subTotal * factor - Long.MAX_VALUE;
+            double metricDouble = subTotal * factor;
             long metric = (long) metricDouble;
             if (Math.abs(metric-metricDouble) >1000) {
                 System.out.println("metric=" + metric + " metricDouble=" + metricDouble);

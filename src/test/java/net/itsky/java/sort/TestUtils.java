@@ -79,6 +79,7 @@ public class TestUtils {
         }
         for (String x: data) {
             long mx = metric.metric(x);
+            assertTrue(mx >= 0L, () -> "x=" + x + " mx=" + mx);
             for (String y:data) {
                 if (x.equals(y)) {
                     continue;

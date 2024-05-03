@@ -13,7 +13,8 @@ public class Utf16StringMetric implements Metric<String> {
                 result += s.charAt(i);
             }
         }
-        result += Long.MIN_VALUE;
+        result >>= 1;
+        result &= 0x7fff_ffff_ffff_ffffL;
         return result;
     }
 }

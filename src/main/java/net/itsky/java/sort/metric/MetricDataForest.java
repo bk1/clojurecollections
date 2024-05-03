@@ -55,7 +55,7 @@ public class MetricDataForest implements Metric<String> {
             SortedMap<String, Long> tailMap = map.tailMap(key);
             final long metric;
             if (tailMap.isEmpty()) {
-                metric = Long.MIN_VALUE;
+                metric = 0L;
             } else {
                 metric = tailMap.firstEntry().getValue();
             }

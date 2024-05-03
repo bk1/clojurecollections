@@ -208,7 +208,7 @@ key.length=5 count=0 sum=0
 
     public long metric(String s) {
         if (s == null|| s.isEmpty()) {
-            return Long.MIN_VALUE;
+            return 0L;
         }
         int ci = s.charAt(0);
         String t = s.substring(1);
