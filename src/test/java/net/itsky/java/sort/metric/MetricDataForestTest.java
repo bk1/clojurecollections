@@ -10,6 +10,7 @@ import java.io.PipedOutputStream;
 import java.util.List;
 
 import static net.itsky.java.sort.TestData.*;
+import static net.itsky.java.sort.TestUtils.checkMinMaxPairs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -118,6 +119,11 @@ public class MetricDataForestTest {
     @Test
     void testConsistencyXy() {
         checkConsistency(List.of("\u0000", "ÿ"));
+    }
+
+    @Test
+    void testClassMinMax() {
+        checkMinMaxPairs(LIST_OF_CLASS_MIN_MAX, metric, false);
     }
 
 }

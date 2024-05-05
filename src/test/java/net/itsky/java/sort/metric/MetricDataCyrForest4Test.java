@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.List;
 
 import static net.itsky.java.sort.TestData.*;
+import static net.itsky.java.sort.TestUtils.checkMinMaxPairs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -170,4 +171,11 @@ public class MetricDataCyrForest4Test {
                 List.of("", ""));
         listOfLists.forEach(this::checkConsistency);
     }
+
+
+    @Test
+    void testClassMinMax() {
+        checkMinMaxPairs(LIST_OF_CLASS_MIN_MAX, metric, false);
+    }
+
 }

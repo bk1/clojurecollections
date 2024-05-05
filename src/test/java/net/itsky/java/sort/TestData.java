@@ -33,7 +33,7 @@ public class TestData {
 
     public static final List<String> CYR_LAT_MIX = createList(3, 0x00, 0x01, 0x7f, 0x80, 0xff, 0x100, 0x1ff, 0x200, 0x3ff, 0x400, 0x401, 0x4ff, 0x500, 0x501);
 
-    public static final List<String> UKRAINIAN_WORDS = List.of( "ще", "Намісник", "Архіви/ЦДАВО/5069/1", "Сторінка:Історія", "q3xkwgo6496mbzxwqtomkqdlbro5yyn", "демократія«,", "все", "я", "самого", "вояк",
+    public static final List<String> UKRAINIAN_WORDS = List.of("ще", "Намісник", "Архіви/ЦДАВО/5069/1", "Сторінка:Історія", "q3xkwgo6496mbzxwqtomkqdlbro5yyn", "демократія«,", "все", "я", "самого", "вояк",
             "п'ятиріччі", "і", "ґанку", "наймички", "погоджувати", "закричала", "було", "собі", "України", "поляні", "коня", "перевірки.", "Держави", "мають", "він", "Чікаго:", "Дитячі", "не", "від",
             "на", "в", "—", "різьбарі,", "втікає", "перед", "нова", "нам", "Словник", "Гурский", "якого", "352868", "хто", "української", "саду,", "text/x-wiki", "Вертатись:", "з", "віддихав",
             "wikitext", "В.А.", "прилягають", "нашого", "Leh", "і", "скрикнула:", "спочиваючи.", "згадують", "не", "Мукачевому", "f45d891p6hb6bnty909gxw24fh2k9ky", "склався", "гуде",
@@ -93,10 +93,63 @@ public class TestData {
             "непокій.", "свобідний", "За", "журнальних", "органи", "й", "2022-08-24T15:16:21Z", "11101", "Вода", "зробити", "же", "і", "83245", "wikitext", "кахала.", "зерно", "сяючих", "очі.",
             "такихъ");
 
+    public static final List<List<String>> LIST_OF_CLASS_MIN_MAX = List.of(
 
+            List.of("0", "0zzyhmo8hgb7zdcw05n0no6i0knaeuk "),
+            List.of("0", "0. г. (Фізично-математичні науки, Київ). Данілевський В. Я."),
+            List.of("10–12", "115xex11ped0srlf2kiedmauk4ios4w "),
+            List.of("11", "11–16 листопада 2002 р. у м. Марселі (Франція) відбувся традиційний форум архівістів — XXXVI Міжнародна конференція Круглого столу архівів (CITRA), у рамках якого було проведено Генеральну асамблею Європейського відділення (EURBICA) Міжнародної ради архівів та  Делегатські збори МРА."),
+            List.of("1", "1⅓ пап. арк. 1 пап. арк. 62.500 літ."),
+            List.of("1", "1ң іко-географічного, ентомологічного. З метою виявлення придатности"),
+            List.of("20", "20—22 III. 1904 р."),
+            List.of("20", "202999 "),
+            List.of("2", "2—3) Шкребачки з пластини, ретушованого оброблення (3)."),
+            List.of("2", "2і5 БеРед очима мені ця маєтність багата, даремно"),
+            List.of("24–25 лютого 2011 р. у конференц-залі комплексу споруд центральних державних архівів України (м. Київ, вул. Солом'янська, 24) відбулося розширене засідання колегії Державного комітету архівів України, присвячене підбиттю підсумків роботи державних архівних установ у 2010 р. та завданням на 2011 р.", "259x675o2z3s8hpp7mmao5wuvnm3no3 "),
+            List.of("250", "250. Уляницкий;"),
+            List.of("25", "25–28 червня 2008 проводив свою роботу у Києві Сьомий конгрес україністів. У програмі заявлено було понад 300 доповідей і виступів вчених з 18 країн. На 10 секціях було представлено напрями українознавчих студій: історія України, політологія, етнокультурологія, філософія, релігієзнавство, мистецтвознавство, мовознавство, літературознавство, фольклористика."),
+            List.of("3", "3’їзд Рад відкрився ще до кінця конференції. В цей день у Києві було надто неспокійно. Залізницею, Дніпром та кіньми стягалися до Центральної Ради делегати з'їзду. Там їх приймали, накачували, частували і, давши від себе проводарів, посилали їх до мандатної комісії з'їзду."),
+            List.of("3", "3ї місто славне та багате роскинуло ся, люду торговель-"),
+            List.of("4", "4—5 см нижче від вiнця; самий вінчик посуду теж мережаний"),
+            List.of("4", "4» дивуватві"),
+            List.of("53", "53–60 Гостомель"),
+            List.of("5381 ", "538199 "),
+            List.of("53   Соколов", "539ztx4liu7nppd185of2xojxzilfow "),
+            List.of("5", "5—в; 73—е; 123—ч; 124; 128—з; 134; 135; 189—а, б; 212—в; 263-А, 9. (Перекладъ святого письма нового завіту — П. Куліша)."),
+            List.of("5", "5 лютого, після операції в районі Канева обидві дивізії, скупчивши кінноту під керуванням отамана Тютюнника, переправилися в район Сміла–Бобринська. Піхотою й обозом керував отаман Загродський. Піші частини дивізії через Руську-Поляну (повз Черкаси) були перекинуті в село Вергуни. Під час походу був такий мороз, що було чимало обморожених, а один козак замерз."),
+            List.of("6", "6—9 січня 1883."),
+            List.of("6", "6» стеж"),
+            List.of("Lecz duch z wyżyn cię okalał,", "Lexusuns "),
+            List.of("Le doglianze del Casimiro fatte al suo fratello per esser stato il primo a notificar all' Imperatore con espressa persona la morte del Re et alli Magnati del Regno insinuandoseli per la corona la risposta, che ha dato alla Regina a nome di S. A. in presenza del confessore del Casimiro sopra le dette doglianze fatteli da S. M. per la unione e buona corrispondenza fraterna, cioè di non hauer errato S. A. a dar parte della morte del Re, a chi doueva, mentre il fratello si trouaua assente.", "Lexusuns "),
+            List.of("L", "L’amour, pour tant de cœurs l’objet de plus doux charmes"),
+            List.of("L", "LХХХІХ"),
+            List.of("pr00t3kcea2vs2zor6popbnwwcxtwh3 ", "przy jw. imć panu Kasztelanie Krakowskim dobrych i ochotniego z wojska niemało, do tego armat i preparamentu wojennego było dosyć, dodali im pomocy ci, którzy byli principaliora capita u nich, jakoto imć pana Czarneckiego półkownika, jw. imć pana Stanisława z Wisznica Lubomirskiego wojewodę krakowskiego, a temu był regiment wcale i zupełnie powierzony, przy nim imć pana Brzuchańskiego białocerkiewskiego, pana Woniłowicza kaniowskiego pułkowników. Zdrajca Chmielnicki uczęstował zaraz posłów łańcuchami i okowami, tandem owi już pozostali sine integro consilio w ostatku uchodzić poczęli z tego miejsca taborem, w której drodze siła ludzi stracili. Tandem znowu pod Kniaziemi Bajerakami osadzeni nadzieję już straciwszy de salute sua i przez niedziel dwie"),
+            List.of("pr6188ittjxuns2gd3mtan81euhat7e ", "pryun6km6bqbykm2m5lq9rcnjpwtv19 "),
+            List.of("proofread-index ", "proofread-page "),
+            List.of("p. було в гімназії 477, а на філософії 174 учні.", "półprawdy, z uwagi przede wszystkim na zawężenie współczesnego kontekstu politycznego,"),
+            List.of("p. було в гімназії 477, а на філософії 174 учні.", "pі(mпs)"),
+            List.of("te04p9ofw2uhzx6mk55ll1u43eqnh0b ", "tezę, że powyższe motyw pobudzane są w przypadku stosunku Moskwy do Polski swoistym"),
+            List.of("te506fmqv3q7isrus149hd41lf1ln11 ", "texz26lrlxq7pj2bp13um5d8kbyrs1u "),
+            List.of("text above picture", "texz26lrlxq7pj2bp13um5d8kbyrs1u "),
+            List.of("t", "tätiger Massen des groBen zаristischen Imperiums brachte"),
+            List.of("t", "tідкреслив, що Союз дивиться на Україну, як на майбутню самостійну незалджну"),
+            List.of("w Amszone?", "wакуль."),
+            List.of("wicklung des ukrainischen Volkеѕ. Der Aufbau der ukrai-", "wikitext "),
+            List.of("wicklung des ukrainischen Volkеѕ. Der Aufbau der ukrai-", "within \"source\".  Indices are 1-based.  If \"target\" is not found, then this "),
+            List.of("wiki ", "wikitext "),
+            List.of("А", "А… той скарб… ти де подів?“"),
+            List.of("—", "― Алилуя заспіваймо,"),
+            List.of("—", "—■ Гав!"),
+            List.of("С    S    ", "Сѣє вѣтер, вѣтром жити буде."),
+            List.of("СсА що ти обіщавъ за дівчинуЪ . . . Гримнувъ Ба- ", "Стїна, м.; XV: 70, 71."),
+            List.of("С", "Сꙋдьба ѹсѣла на поранно̂й зари"),
+            List.of("Стиборівка ", "Стїна, м.; XV: 70, 71."),
+            List.of("Стор", "Стоючи на ньому, рознощики, з високо піднятими в гору, ще мокрими від друкарської фарби задрукованими листками ґазети, почали вигукувати своїм звичаєм:"),
+            List.of("—                              Так і далі буде...— думала вона.— Так!.. Ой, мамо! Нащо ви покинули ", "—ь"),
+            List.of("לערי ריינהארט ", "﻿ "));
 
     static final List<String> UKRAINIAN_WORDS_SORTED = new ArrayList(UKRAINIAN_WORDS);
-    
+
     static {
         Collections.sort(SORTED);
         Collections.sort(LONG_SORTED);
@@ -116,7 +169,7 @@ public class TestData {
         for (int n = 0; n <= length; n++) {
             int[] idx = new int[n];
             while (true) {
-                String str = IntStream.range(0, n).map(i -> idx[i]).map(j -> letters[j]).mapToObj(l -> String.valueOf((char) l)).reduce("", (s, c)-> s+c);
+                String str = IntStream.range(0, n).map(i -> idx[i]).map(j -> letters[j]).mapToObj(l -> String.valueOf((char) l)).reduce("", (s, c) -> s + c);
                 result.add(str);
                 boolean done = true;
                 for (int i = 0; i < n; i++) {

@@ -10,6 +10,7 @@ import java.io.PipedOutputStream;
 import java.util.List;
 
 import static net.itsky.java.sort.TestData.*;
+import static net.itsky.java.sort.TestUtils.checkMinMaxPairs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -147,6 +148,30 @@ public class MetricDataCyrForestTest {
     @Test
     void testConsistencyXy() {
         checkConsistency(List.of("\u0000", "ÿ"));
+    }
+
+    @Test
+    void testConsistencyBigGroups() {
+        List<List<String>> listOfLists
+                = List.of(List.of("0", "0. г. (Фізично-математичні науки, Київ). Данілевський В. Я."),
+                List.of("—", "—\000", "— ", "—Z", "—\377", "—■ Гав!"),
+                List.of("20", "20 maxT=20—22 III. 1904 р."),
+                List.of("Leh Palych", "LehBot"),
+                List.of("proofread-index", "prop: 'revisions',"),
+                List.of("tex1zqdsqtrztoscf25taq9woumj9ff", "teymo4uflev3ulicsb3pgkjhzi6e2at"),
+                List.of("wiki", "will be able to receive him."),
+                List.of("Стор", "Стояв економ високий, сердитий. Хлопець одійшов кілька ступнів у бік і мовчки з підлоб'я дивився на його, не теряючи самоповаги, як то й годиться чарівникові."),
+                List.of("—", "― Алилуя заспіваймо,"),
+                List.of("", ""));
+        listOfLists.forEach(this::checkConsistency);
+        long m1 = metric.metric("—");
+        long m2 = metric.metric("—\001");
+        assertTrue(m1 < m2, String.format("c=%x m1=%d=%x m2=%d=%x", (int) '—', m1, m1, m2, m2));
+    }
+
+    @Test
+    void testClassMinMax() {
+        checkMinMaxPairs(LIST_OF_CLASS_MIN_MAX, metric, false);
     }
 
 }

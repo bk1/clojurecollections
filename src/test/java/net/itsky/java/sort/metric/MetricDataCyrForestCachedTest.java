@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 import static net.itsky.java.sort.TestData.*;
+import static net.itsky.java.sort.TestUtils.checkMinMaxPairs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MetricDataCyrForestCachedTest {
@@ -155,6 +156,11 @@ public class MetricDataCyrForestCachedTest {
     @Test
     void testConsistencyExtremes() {
         checkConsistency(EXTREMES);
+    }
+
+    @Test
+    void testClassMinMax() {
+        checkMinMaxPairs(LIST_OF_CLASS_MIN_MAX, metric, false);
     }
 
 }

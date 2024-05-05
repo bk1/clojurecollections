@@ -51,6 +51,7 @@ public class MetricDataCyrForest implements Metric<String> {
 
     public void read(InputStream stream) {
         System.out.println("reading");
+        list.clear();
         SortedMap<String, Long> map = new TreeSortedMap<>(reverseOrder);
         try (BufferedInputStream bs = new BufferedInputStream(stream)) {
             try (DataInputStream ds = new DataInputStream(bs)) {
@@ -71,17 +72,17 @@ public class MetricDataCyrForest implements Metric<String> {
         for (int ci = 0; ci < LIST_SIZE; ci++) {
             String key = String.valueOf((char) ci);
             long metric = getMetric(map, key);
-            long metricBetween = getMetric(map, key+String.valueOf((char) BETWEEN));
-            long metricAbove = getMetric(map, key+String.valueOf((char)ABOVE));
+            long metricBetween = getMetric(map, key+(char) BETWEEN);
+            long metricAbove = getMetric(map, key+(char)ABOVE);
             final LocalTree localTree;
-            if (ci <= LAT_BLOCK_UPPER || CYR_BLOCK_LOWER <= ci  && ci < CYR_BLOCK_UPPER) {
+            if (ci <= LAT_BLOCK_UPPER || CYR_BLOCK_LOWER <= ci  && ci < CYR_BLOCK_UPPER || ci == 0x2014) {
                 List<LocalTree> latBlock = IntStream.range(LAT_BLOCK_LOWER, LAT_BLOCK_UPPER)
-                        .mapToObj(di -> key + String.valueOf((char) di))
+                        .mapToObj(di -> key + (char) di)
                         .map(key2 -> getMetric(map, key2))
                         .map(m -> new LocalTree(m, m, m, null, null))
                         .toList();
                 List<LocalTree> cyrBlock = IntStream.range(CYR_BLOCK_LOWER, CYR_BLOCK_UPPER)
-                        .mapToObj(di -> key + String.valueOf((char) di))
+                        .mapToObj(di -> key + (char) di)
                         .map(key2 -> getMetric(map, key2))
                         .map(m -> new LocalTree(m, m, m, null, null))
                         .toList();
@@ -89,11 +90,7 @@ public class MetricDataCyrForest implements Metric<String> {
             } else {
                 localTree = new LocalTree(metric, metric, metric,null, null);
             }
-            if (list.size() <= ci) {
-                list.add(localTree);
-            } else {
-                list.set(ci, localTree);
-            }
+            list.add(localTree);
         }
         System.out.println("read");
     }

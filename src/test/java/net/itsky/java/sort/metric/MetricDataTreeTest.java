@@ -1,5 +1,7 @@
 package net.itsky.java.sort.metric;
 
+import net.itsky.java.sort.TestData;
+import net.itsky.java.sort.TestUtils;
 import net.itsky.java.sort.metric.MetricDataTree;
 import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static net.itsky.java.sort.TestData.*;
+import static net.itsky.java.sort.TestUtils.checkMinMaxPairs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -113,6 +116,15 @@ public class MetricDataTreeTest {
         checkConsistency(EXTREMES_UNSORTED);
     }
 
+    @Test
+    void testZeroMetric() {
+        checkConsistency(List.of("0", "0. г. (Фізично-математичні науки, Київ). Данілевський В. Я."));
+    }
+
+    @Test
+    void testClassMinMax() {
+        checkMinMaxPairs(LIST_OF_CLASS_MIN_MAX, metric, false);
+    }
 
 
 }

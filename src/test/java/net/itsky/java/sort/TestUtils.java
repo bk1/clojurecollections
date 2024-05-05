@@ -100,4 +100,21 @@ public class TestUtils {
             }
         }
     }
+
+    public static void checkMinMaxPairs(List<List<String>> minMaxPairs, Metric<String> metric, boolean strict) {
+        for (List<String> pair : minMaxPairs) {
+            checkConsistency(pair, metric);
+            assertEquals(2, pair.size());
+            String s1 = pair.getFirst();
+            String s2 = pair.getLast();
+            long m1 = metric.metric(s1);
+            long m2 = metric.metric(s2);
+            String msg = String.format("m1=%d=%016x m2=%d=%016x delta=%d rel_delta=%f s1=\"%s\" s2=\"%s\"", m1, m1, m2, m2, m2-m1, ((double) (m2-m1))/((double) m1 + (double) m2), s1, s2);
+            System.out.println(msg);
+            assertTrue(m1 <= m2, msg);
+            if (strict) {
+                assertTrue(m1 < m2, msg);
+            }
+        }
+    }
 }

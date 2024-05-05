@@ -12,6 +12,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static net.itsky.java.sort.TestData.*;
+import static net.itsky.java.sort.TestUtils.checkMinMaxPairs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,4 +55,11 @@ public class Cyrillic2BlockStringMetricTest {
         Set<Long> set = IntStream.concat(IntStream.range(0x000,0x100), IntStream.range(0x400, 0x500)).mapToLong(ci -> metric.metric(String.valueOf((char) ci))).boxed().collect(Collectors.toSet());
         assertEquals(0x200, set.size());
     }
+
+
+    @Test
+    void testClassMinMax() {
+        checkMinMaxPairs(LIST_OF_CLASS_MIN_MAX, metric, false);
+    }
+
 }
