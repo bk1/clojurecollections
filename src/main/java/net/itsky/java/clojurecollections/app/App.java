@@ -1,5 +1,8 @@
 package net.itsky.java.clojurecollections.app;
 
+import net.itsky.java.clojurecollections.analyze.AnalyzeNum;
+import net.itsky.java.clojurecollections.analyze.AnalyzeStr;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

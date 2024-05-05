@@ -1,4 +1,4 @@
-package net.itsky.java.clojurecollections.app;
+package net.itsky.java.clojurecollections.analyze;
 
 import net.itsky.java.sort.metric.MetricDataTree;
 import org.eclipse.collections.api.factory.map.primitive.MutableIntLongMapFactory;

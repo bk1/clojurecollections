@@ -1,4 +1,4 @@
-package net.itsky.java.clojurecollections.app;
+package net.itsky.java.clojurecollections.analyze;
 
 import org.eclipse.collections.api.factory.map.primitive.MutableIntLongMapFactory;
 import org.eclipse.collections.api.factory.map.primitive.MutableLongLongMapFactory;
