@@ -131,15 +131,11 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
         int minClassSize = Integer.MAX_VALUE;
         int maxClassSize = 0;
         int classSizeCount = 0;
-        int classCategories[] = new int[8];
+        int[] classCategories = new int[8];
         T maxClassMin = null;
         T maxClassMax = null;
         int classesBelowLimit = 0;
         int classesAboveLimit = 0;
-        double avgClassSize = 0;
-        if (sortWholeList && lSize > 0 && classSizeCount > 0) {
-            avgClassSize = (end - begin) / classSizeCount;
-        }
         /* use fsort or qsort or hsort for each class */
         for (k = 0; k < lSize; k++) {
             int lower = ll[k];
@@ -181,6 +177,10 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
             }
         }
         if (sortWholeList) {
+            double avgClassSize = 0;
+            if (sortWholeList && lSize > 0 && classSizeCount > 0) {
+                avgClassSize = (end - begin) / (double) classSizeCount;
+            }
             System.out.println("tm=" + tm + " th=" + th + " minCS=" + minClassSize + " maxCS=" + maxClassSize + " avgCS=" + avgClassSize + " nCS=" + classSizeCount + " nCSbl=" + classesBelowLimit + " nCSal=" + classesAboveLimit + " mMin="+mMin + " mMax=" + mMax + " step=" + step);
             for (int i = 0; i <classCategories.length; i++) {
                 System.out.print(" cc[" + i + "]=" + classCategories[i]);

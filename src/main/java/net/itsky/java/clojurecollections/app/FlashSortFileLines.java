@@ -24,57 +24,85 @@ public class FlashSortFileLines {
         MetricDataCyrArrForest metricDataCyrArrForest = new MetricDataCyrArrForest();
         MetricDataCyrForest4 metricDataCyrForest4 = new MetricDataCyrForest4();
 
-        try (InputStream stream = new FileInputStream("metric.dat")) {
+        try (InputStream stream = getMetricStream()) {
             metricDataTree.read(stream);
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             ioex.printStackTrace();
         }
         System.out.println("metricDataTree ready");
-        try (InputStream stream = new FileInputStream("1c-metric.dat")) {
+        try (InputStream stream = get1cStream()) {
             metricDataOneChar.read(stream);
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             ioex.printStackTrace();
         }
         System.out.println("metricDataOneChar ready");
-        try (InputStream stream = new FileInputStream("metric.dat")) {
+        try (InputStream stream = getMetricStream()) {
             metricDataForest.read(stream);
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             ioex.printStackTrace();
         }
         System.out.println("metricDataForest ready");
-        try (InputStream stream = new FileInputStream("metric.dat")) {
+        try (InputStream stream = getMetricStream()) {
             metricDataCyrForest.read(stream);
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             ioex.printStackTrace();
         }
         System.out.println("metricDataCyrForest ready");
-        try (InputStream stream = new FileInputStream("metric.dat")) {
+        try (InputStream stream = getMetricStream()) {
             metricDataCyrForestCached.read(stream);
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             ioex.printStackTrace();
         }
         System.out.println("metricDataCyrForestCached ready");
-        try (InputStream stream = new FileInputStream("metric.dat")) {
+        try (InputStream stream = getMetricStream()) {
             metricDataCyrArrForest.read(stream);
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             ioex.printStackTrace();
         }
         System.out.println("metricDataCyrArrForest ready");
-        try (InputStream stream = new FileInputStream("metric.dat"); InputStream stream2 = new FileInputStream("frequencies.dat")) {
-            metricDataCyrForest4.read(stream, stream2);
+        try (InputStream streamM = getMetricStream(); InputStream streamF = getFrequencyStream()) {
+            metricDataCyrForest4.read(streamM, streamF);
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             ioex.printStackTrace();
         }
         System.out.println("metricDataCyrArrForest ready");
 
-        Map<String, Metric<String>> metrics = Map.of("default", new Utf16StringMetric(), "cyrillic", new CyrillicStringMetric(), "2bcyrillic", new Cyrillic2BlockStringMetric(), "tree", metricDataTree, "1c", metricDataOneChar, "forest", metricDataForest, "cyrforest", metricDataCyrForest, "cyrforestcached", metricDataCyrForestCached, "cyrarrforest", metricDataCyrArrForest, "cyrforest4" , metricDataCyrForest4);
+        Map<String, Metric<String>> metrics = new HashMap<>(Map.of("default", new Utf16StringMetric(), "cyrillic", new CyrillicStringMetric(), "2bcyrillic", new Cyrillic2BlockStringMetric(), "tree", metricDataTree, "1c", metricDataOneChar, "forest", metricDataForest, "cyrforest", metricDataCyrForest, "cyrforestcached", metricDataCyrForestCached, "cyrarrforest", metricDataCyrArrForest, "cyrforest4" , metricDataCyrForest4));
+        for (int depth=1;depth<=10;depth++) {
+            MetricDataIndependentChar metric = new MetricDataIndependentChar(depth);
+            String key = "ind[" + depth + "]";
+            try (InputStream stream = get1cStream()) {
+                metric.read(stream);
+            } catch (IOException ioex) {
+                System.out.println("ioex=" + ioex + " key=" + key);
+                ioex.printStackTrace();
+            }
+            System.out.println("key ready");
+            metrics.put(key, metric);
+            long prev = 0L;
+            for (int ci=0; ci<= Character.MAX_VALUE; ci++) {
+                String s = String.valueOf(ci);
+                long m = metric.metric(s);
+                if (m < prev) {
+                    System.out.println("depth=" + depth+ " m=" + m + " prev=" +prev + " s=" + s);
+                    System.exit(1);
+                }
+                long m1 = metricDataOneChar.metric(s);
+                if (m != m1 && depth == 1) {
+                    System.out.println("depth=" + depth+ " m=" + m + " m1=" +m1 + " prev=" + prev + " s=" + s);
+                    System.exit(1);
+                }
+            }
+        }
+
+
         MutableObjectLongMap<String> timing = new ObjectLongHashMap<>();
         SortMetricized<String, List<String>> flashSort = new FlashSort<>();
 
@@ -99,9 +127,27 @@ public class FlashSortFileLines {
                 System.out.println("i=" + i + " " + name + ": t=" + t / (i + 1));
                 if (!jlist.equals(sortedList)) {
                     System.out.println("flashSort_" + name + " failed");
+                    for (int ii=0; ii < jlist.size(); ii++) {
+                        if (! Objects.equals(jlist.get(ii), sortedList.get(ii))) {
+                            System.out.println("name=" + name + " i=" + i + " ii=" + ii + " jlist[ii]=\"" + jlist.get(ii) + "\" slist[ii]=\"" + sortedList.get(ii) + "\"");
+                            break;
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private InputStream getMetricStream() {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric.dat");
+    }
+
+    private InputStream getFrequencyStream() {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-frequencies.dat");
+    }
+
+    private InputStream get1cStream() {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream("ukrainian-metric-1c.dat");
     }
 
 }

@@ -56,6 +56,8 @@ public class MetricDataOneChar implements Metric<String> {
             System.out.println("ioex=" + ioex);
             throw new UncheckedIOException(ioex);
         }
+        System.out.println("last=" + metric("\uffff") + "=" + singleCharList[ARR_SIZE-1]);
+        System.out.println("read one");
     }
 
     public void write(OutputStream stream) {

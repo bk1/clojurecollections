@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static net.itsky.java.sort.TestData.*;
 import static net.itsky.java.sort.TestUtils.checkMinMaxPairs;
@@ -22,7 +20,7 @@ public class Cyrillic2BlockStringMetricTest {
 
     @Test
     void testMetric() {
-        List<List<String>> listOfLists = List.of(UNSORTED, LONG_UNSORTED,NUMBERS_UNSORTED, ASIATIC_UNSORTED, EXTREMES);
+        List<List<String>> listOfLists = List.of(UNSORTED, LONG_UNSORTED, NUMBERS_UNSORTED, ASIATIC_UNSORTED, EXTREMES);
         for (List<String> list : listOfLists) {
             TestUtils.checkConsistency(list, metric);
         }
@@ -36,7 +34,7 @@ public class Cyrillic2BlockStringMetricTest {
             for (int i = 0; i < n; i++) {
                 String x = list.get(i);
                 long xm = metric.metric(x);
-                List<String> otherList = IntStream.of(0, 1, 2, 3, i-5, i-4, i-3, i-2, i-1, i, i+1, i+2, i+3, i+4, i+5, n-4, n-3, n-2, n-1).filter(k-> 0 <= k && k < n).mapToObj(list::get).toList();
+                List<String> otherList = IntStream.of(0, 1, 2, 3, i - 5, i - 4, i - 3, i - 2, i - 1, i, i + 1, i + 2, i + 3, i + 4, i + 5, n - 4, n - 3, n - 2, n - 1).filter(k -> 0 <= k && k < n).mapToObj(list::get).toList();
                 for (String y : otherList) {
                     long ym = metric.metric(y);
                     if (xm < ym) {
@@ -52,7 +50,7 @@ public class Cyrillic2BlockStringMetricTest {
 
     @Test
     void testCoverage() {
-        Set<Long> set = IntStream.concat(IntStream.range(0x000,0x100), IntStream.range(0x400, 0x500)).mapToLong(ci -> metric.metric(String.valueOf((char) ci))).boxed().collect(Collectors.toSet());
+        Set<Long> set = IntStream.concat(IntStream.range(0x000, 0x100), IntStream.range(0x400, 0x500)).mapToLong(ci -> metric.metric(String.valueOf((char) ci))).boxed().collect(Collectors.toSet());
         assertEquals(0x200, set.size());
     }
 

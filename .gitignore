@@ -28,3 +28,7 @@ target
 .idea
 
 TestLines.java
+1c-metric.dat
+frequencies.dat
+metric.dat
+test-durations.dat

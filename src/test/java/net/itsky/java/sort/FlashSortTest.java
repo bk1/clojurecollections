@@ -8,13 +8,11 @@ import org.eclipse.collections.impl.list.immutable.ImmutableListFactoryImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static net.itsky.java.sort.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,15 +30,16 @@ public class FlashSortTest {
 
     private final SortMetricized<String, TransientList<String>> tlistSort = new FlashSort<>();
 
-    private final Metric<String> utf16StringMetric = new Utf16StringMetric();
+    private static final Metric<String> utf16StringMetric = new Utf16StringMetric();
 
-    private static Metric<String> cyrillic2BlockMetric = new Cyrillic2BlockStringMetric();
+    private static final Metric<String> cyrillic2BlockMetric = new Cyrillic2BlockStringMetric();
 
-    private static Metric<String> cyrillicMetric = new CyrillicStringMetric();
+    private static final Metric<String> cyrillicMetric = new CyrillicStringMetric();
 
-    private static Metric<String> latin1Metric = new Latin1StringMetric();
+    private static final Metric<String> latin1Metric = new Latin1StringMetric();
 
     private static Metric<String> oneCharMetric;
+    private static MetricDataIndependentChar[] independentCharMetrics;
 
     private static Metric<String> treeMetric;
 
@@ -66,13 +65,20 @@ public class FlashSortTest {
 
     private final Metric<Integer> defaultIntMetric = x -> x;
 
-    private final List<Metric<String>> metrics = List.of(utf16StringMetric, cyrillic2BlockMetric, cyrillicMetric, latin1Metric,
-                        treeMetric, oneCharMetric, forestMetric, forestCyrMetric, forestCyrArrMetric, forestCyrMetricCached, forestCyrMetric4);
+    private static List<Metric<String>> metrics;
 
     @BeforeAll
     static void initMetric() {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         MetricDataOneChar oneCharMetric = new MetricDataOneChar();
+        oneCharMetric.read(classLoader.getResourceAsStream("ukrainian-metric-1c.dat"));
+        FlashSortTest.independentCharMetrics
+                    = IntStream.rangeClosed(1, 10)
+                .mapToObj(MetricDataIndependentChar::new)
+                .map(metric->{
+                    metric.read(classLoader.getResourceAsStream("ukrainian-metric-1c.dat"));
+                    return metric;
+                }).toArray(MetricDataIndependentChar[]::new);
         oneCharMetric.read(classLoader.getResourceAsStream("ukrainian-metric-1c.dat"));
         FlashSortTest.oneCharMetric = oneCharMetric;
         MetricDataTree treeMetric = new MetricDataTree();
@@ -94,6 +100,10 @@ public class FlashSortTest {
         forestCyrMetric4.read(classLoader.getResourceAsStream("ukrainian-metric.dat"), classLoader.getResourceAsStream("ukrainian-frequencies.dat"));
         FlashSortTest.forestCyrMetric4 = forestCyrMetric4;
 
+        Stream<Metric<String>> streamA = Stream.of(utf16StringMetric, cyrillic2BlockMetric, cyrillicMetric, latin1Metric,
+                        treeMetric, oneCharMetric, forestMetric, forestCyrMetric, forestCyrArrMetric, forestCyrMetricCached, forestCyrMetric4);
+        Stream<Metric<String>> streamB = Arrays.stream(independentCharMetrics);
+        FlashSortTest.metrics = Stream.concat(streamA, streamB).toList();
     }
 
     @Test
@@ -150,6 +160,26 @@ public class FlashSortTest {
             TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), transientListSwapper, metric);
             assertEquals(LONG_SORTED, sortedT);
         });
+    }
+
+    @Test
+    void testFlashSort1000Lines() {
+        metrics.stream().forEach(metric -> {
+            List<String> unsortedList = new ArrayList<>(X_1000_LINES);
+            PersistentList<String> unsortedP = new PersistentList<>(X_1000_LINES);
+            TransientList<String> unsortedT = new TransientList<>(X_1000_LINES);
+
+
+            List<String> sortedList = listSort.sort(unsortedList, Comparator.naturalOrder(), listSwapper, metric);
+            assertEquals(X_1000_LINES_SORTED, sortedList);
+
+            PersistentList<String> sortedP = plistSort.sort(unsortedP, Comparator.naturalOrder(), persistentListSwapper, metric);
+            assertEquals(X_1000_LINES_SORTED, sortedP);
+
+            TransientList<String> sortedT = tlistSort.sort(unsortedT, Comparator.naturalOrder(), transientListSwapper, metric);
+            assertEquals(X_1000_LINES_SORTED, sortedT);
+        });
+
     }
 
     @Test

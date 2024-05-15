@@ -18,7 +18,9 @@ public class App {
         ANALYZE_STR,
         FLASH_SORT,
         LINE_SORT,
-        NUM_SORT;
+        NUM_SORT,
+
+        METRIC;
     }
 
     public static void main(String[] args) {
@@ -77,6 +79,10 @@ public class App {
             case ANALYZE_STR ->  {
                 AnalyzeStr analyzeStr = new AnalyzeStr();
                 analyzeStr.analyzeFileContent(lines);
+            }
+            case METRIC ->  {
+                MetricSortedFileLines metricSortedFileLines = new MetricSortedFileLines();
+                metricSortedFileLines.processFileContent(lines);
             }
         }
     }

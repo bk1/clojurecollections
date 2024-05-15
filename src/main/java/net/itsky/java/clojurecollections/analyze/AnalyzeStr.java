@@ -22,10 +22,10 @@ public class AnalyzeStr {
     private static final long NORMAL_VAL = 100;
     private static final long START_VAL = 1000;
 
-    private static final int MAX_SHORT_SUB_WORD_LENGTH = 5;
-    private static final int MAX_LONG_SUB_WORD_LENGTH = 10;
+    private static final int MAX_SHORT_SUB_WORD_LENGTH = 4;
+    private static final int MAX_LONG_SUB_WORD_LENGTH = 9;
 
-    private static final long MIN_SUBWORD5_FREQ = 100 * NORMAL_VAL + MIN_VAL;
+    private static final long MIN_SHORT_SUBWORD_FREQ = 1000 * NORMAL_VAL + MIN_VAL;
 
 
     private static final int MAX_FREQ_LENGTH = 6;
@@ -103,8 +103,8 @@ public class AnalyzeStr {
         IntStream.range(0, n).forEach(lower -> {
             long val = lower == 0 ? START_VAL : NORMAL_VAL;
             int nn = Math.min(n, lower + MAX_SHORT_SUB_WORD_LENGTH);
-            IntStream.range(lower + 1, nn).forEach(upper -> {
-                String subString = s.substring(lower, upper); // Nnew SubString(s, lower, upper);
+            IntStream.rangeClosed(lower + 1, nn).forEach(upper -> {
+                String subString = s.substring(lower, upper).intern(); // Nnew SubString(s, lower, upper);
                 subWordMap.put(subString, val + subWordMap.getIfAbsent(subString, MIN_VAL));
             });
         });
@@ -112,24 +112,36 @@ public class AnalyzeStr {
 
     private void analyzeLongSubWords(String word) {
         countWordL();
-        wordMap.put(word, NORMAL_VAL + wordMap.getIfAbsent(word, MIN_VAL));
+        //wordMap.put(word, NORMAL_VAL + wordMap.getIfAbsent(word, MIN_VAL));
         int wordLength = word.length();
         if (wordLength < MAX_SHORT_SUB_WORD_LENGTH + 1) {
             return;
         }
         IntStream.range(0, wordLength - MAX_SHORT_SUB_WORD_LENGTH - 1)
-                .filter(lower -> subWordMap.getIfAbsent(word.substring(lower, lower + MAX_SHORT_SUB_WORD_LENGTH), 0) > MIN_SUBWORD5_FREQ)
+                .filter(lower -> filterLongWord(word, lower, MAX_SHORT_SUB_WORD_LENGTH+1))
                 .forEach(lower -> {
-                    System.out.println("lower=" + lower + " word=" + word);
                     long val = lower == 0 ? START_VAL : NORMAL_VAL;
                     int nn = Math.min(wordLength, lower + MAX_LONG_SUB_WORD_LENGTH);
                     IntStream.range(lower + MAX_SHORT_SUB_WORD_LENGTH + 1, nn)
+                            .filter(upper -> filterLongWord(word, lower, upper-lower))
                             .forEach(upper -> {
-                                String subString = word.substring(lower, upper); // Nnew SubString(s, lower, upper);
-                                System.out.println("lower=" + lower + " upper=" + upper + " substring=" + subString);
+                                String subString = word.substring(lower, upper).intern(); // Nnew SubString(s, lower, upper);
                                 subWordMap.put(subString, val + subWordMap.getIfAbsent(subString, MIN_VAL));
                             });
                 });
+    }
+
+    private boolean filterLongWord(String word, int lower, int length) {
+        long limit = MIN_SHORT_SUBWORD_FREQ;
+        if (lower > 0) {
+            limit<<= 1;
+        }
+        if (length > MIN_SHORT_SUBWORD_FREQ +1) {
+            limit <<= 2*(length - MIN_SHORT_SUBWORD_FREQ-1);
+        }
+        long value = subWordMap.getIfAbsent(word.substring(lower, lower + MAX_SHORT_SUB_WORD_LENGTH), 0);
+        boolean result = value >= limit;
+        return result;
     }
 
     private String analyzeIntervals(String s, int maxLeftOverSize) {
@@ -168,7 +180,7 @@ public class AnalyzeStr {
             countLine();
             String[] parts = (leftoverWhiteSpace + line).splitWithDelimiters("\\w+", 0);
             int last = parts.length - 1;
-            Stream.of(parts).limit(last).filter(s -> !s.isEmpty()).map(String::intern).forEach(this::analyzeShortSubWords);
+            Stream.of(parts).limit(last).filter(s -> !s.isEmpty()).forEach(this::analyzeShortSubWords);
             return parts[last];
         });
 
@@ -180,7 +192,7 @@ public class AnalyzeStr {
             countLine();
             String[] parts = (leftoverWhiteSpace + line).splitWithDelimiters("\\w+", 0);
             int last = parts.length - 1;
-            Stream.of(parts).limit(last).filter(s -> !s.isEmpty()).map(String::intern).forEach(this::analyzeLongSubWords);
+            Stream.of(parts).limit(last).filter(s -> !s.isEmpty()).forEach(this::analyzeLongSubWords);
             return parts[last];
         });
         analyzeLongSubWords(r2);
@@ -194,7 +206,6 @@ public class AnalyzeStr {
         System.out.println("subWordMap1.size=" + subWordMapSize1);
         System.out.println("subWordMap2.size=" + subWordMap.size());
         System.out.println("totalCount=" + totalCount);
-        System.exit(0);
 
         CharSequence lastCharSeq = subWordMap
                 .keySet()
@@ -252,7 +263,7 @@ public class AnalyzeStr {
                 try (DataOutputStream ds = new DataOutputStream(bs)) {
                     subWordMap.keySet()
                             .stream()
-                            .filter(k -> subWordMap.getIfAbsent(k, 0) > MIN_SUBWORD5_FREQ)
+                            .filter(k -> subWordMap.getIfAbsent(k, 0) > MIN_SHORT_SUBWORD_FREQ)
                             .filter(k -> k.length() <= MAX_FREQ_LENGTH)
                             .map(k -> new KeyValue(k.toString(), subWordMap.getIfAbsent(k, 0)))
                             .forEach(kv -> {
