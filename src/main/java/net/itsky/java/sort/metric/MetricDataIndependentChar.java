@@ -86,7 +86,7 @@ public class MetricDataIndependentChar implements Metric<String> {
         boolean done = false;
         for (int i = 0; i < depth; i++) {
             result *= factor;
-            done |= i>=l;
+            done |= (i>=l);
             if (! done) {
                 int c = s.charAt(i);
                 long m = singleCharList[c];

@@ -95,7 +95,7 @@ public class MetricDataForest implements Metric<String> {
 
     public long metric(String s) {
         if (s == null|| s.isEmpty()) {
-            return Long.MIN_VALUE;
+            return 0L;
         }
         int ci = s.charAt(0);
         return list.get(ci).metric(s);
