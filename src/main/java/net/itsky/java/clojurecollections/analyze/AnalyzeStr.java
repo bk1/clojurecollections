@@ -31,6 +31,7 @@ public class AnalyzeStr {
     private static final int MAX_FREQ_LENGTH = 6;
 
     private static final double LONG_MAX_VALUE = (double) Long.MAX_VALUE;
+    private static final double INT_MAX_VALUE = (double) Integer.MAX_VALUE;
 
     private long step(int l) {
         if (l <= 1) {
@@ -230,11 +231,11 @@ public class AnalyzeStr {
         });
         analyzeIntervals(r3, 0);
 
-        SortedMap<String, Long> dataMap = new TreeSortedMap<>(Comparator.reverseOrder());
-        SortedMap<String, Long> filteredDataMap = new TreeSortedMap<>(Comparator.reverseOrder());
+        SortedMap<String, Integer> dataMap = new TreeSortedMap<>(Comparator.reverseOrder());
+        SortedMap<String, Integer> filteredDataMap = new TreeSortedMap<>(Comparator.reverseOrder());
 
         long total = intervalMap.values().stream().mapToLong(x -> x.longValue()).sum();
-        double factor = Long.MAX_VALUE / (double) total;
+        double factor = INT_MAX_VALUE / (double) total;
         System.out.println("total=" + total + " factor=" + factor);
         long subTotal = 0;
         long i = 0;
@@ -242,9 +243,9 @@ public class AnalyzeStr {
             StringInterval key = entry.getKey();
             long value = entry.getValue();
             subTotal += value;
-            double metricDouble = Math.min(subTotal * factor, LONG_MAX_VALUE);
-            long metric = (long) metricDouble;
-            if (Math.abs(metric - metricDouble) > 1000) {
+            double metricDouble = Math.min(subTotal * factor, INT_MAX_VALUE);
+            int metric = (int) metricDouble;
+            if (Math.abs(metric - metricDouble) > 100) {
                 System.out.println("metric=" + metric + " metricDouble=" + metricDouble);
             }
             dataMap.put(key.start(), metric);

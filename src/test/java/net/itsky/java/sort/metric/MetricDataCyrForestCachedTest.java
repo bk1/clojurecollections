@@ -41,8 +41,8 @@ public class MetricDataCyrForestCachedTest {
         int i = 0;
         for (String s : sourceKeys) {
             i++;
-            if (i%997 == 0 || i < 1000 || i > sourceKeys.size()-1000) {
-                assertEquals(source.metric(s), target.metric(s));
+            if (i%997 == 0 || i < 1000 || i >= sourceKeys.size()-1000) {
+                assertEquals(source.metric(s), target.metric(s), "i=" + i + " s=\"" + s + "\"");
             }
         }
     }

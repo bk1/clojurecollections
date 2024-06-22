@@ -1,6 +1,7 @@
 package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.Metric;
+import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 
 import java.io.*;
@@ -9,18 +10,21 @@ import java.util.List;
 public class MetricDataIndependentChar implements Metric<String> {
     public static final int ARR_SIZE = Character.MAX_VALUE + 1;
 
-    private final long[] singleCharList;
+    private final int[] singleCharList;
 
-    private long factor;
+    private int factor;
 
     private final int depth;
 
+    private final double root;
+
     public MetricDataIndependentChar(int depth) {
-        this(depth, new long[ARR_SIZE+1]);
+        this(depth, new int[ARR_SIZE+1]);
     }
 
-    public MetricDataIndependentChar(int depth, long[] singleCharList) {
+    public MetricDataIndependentChar(int depth, int[] singleCharList) {
         this.depth = depth;
+        this.root = Math.pow(Integer.MAX_VALUE, 1.0/depth);
         this.singleCharList = singleCharList;
         if (depth <= 0 || depth > 10) {
             throw new IllegalArgumentException("depth=" + depth +" must be > 0 and <= 10");
@@ -28,24 +32,26 @@ public class MetricDataIndependentChar implements Metric<String> {
 
     }
 
-    public MetricDataIndependentChar(int depth, LongList singleCharList) {
+    public MetricDataIndependentChar(int depth, IntList singleCharList) {
         this(depth, singleCharList.toArray());
     }
 
-    public MetricDataIndependentChar(int depth, List<Long> singleCharList) {
-        this(depth, singleCharList.stream().mapToLong(Long::longValue).toArray());
+    public MetricDataIndependentChar(int depth, List<Integer> singleCharList) {
+        this(depth, singleCharList.stream().mapToInt(Integer::intValue).toArray());
     }
 
+    private long calcDivisor() {
+        return (depth == 1 ? 1L : (long) (Integer.MAX_VALUE / (root-2))) << 32;
+    }
     public void read(InputStream stream) {
-        double root = Math.pow(Long.MAX_VALUE, 1.0/depth);
-        long divisor = depth == 1 ? 1L : (long) (Long.MAX_VALUE / (root-2));
+        long divisor = calcDivisor();
         try (BufferedInputStream bs = new BufferedInputStream(stream)) {
             try (DataInputStream ds = new DataInputStream(bs)) {
                 int ci = 0;
                 while (true) {
                     try {
                         long val = ds.readLong();
-                        singleCharList[ci++] = val / divisor;
+                        singleCharList[ci++] = (int) (val / divisor);
                         if (ci >= ARR_SIZE) {
                             break;
                         }
@@ -54,7 +60,7 @@ public class MetricDataIndependentChar implements Metric<String> {
                     }
                 }
             }
-            singleCharList[ARR_SIZE] = Long.MAX_VALUE;
+            singleCharList[ARR_SIZE] = Integer.MAX_VALUE;
         } catch (IOException ioex) {
             System.out.println("ioex=" + ioex);
             throw new UncheckedIOException(ioex);
@@ -64,10 +70,11 @@ public class MetricDataIndependentChar implements Metric<String> {
     }
 
     public void write(OutputStream stream) {
+        long divisor = calcDivisor();
         try (BufferedOutputStream bs = new BufferedOutputStream(stream)) {
             try (DataOutputStream ds = new DataOutputStream(bs)) {
                 for (int ci = 0; ci < ARR_SIZE; ci++) {
-                    ds.writeLong(singleCharList[ci]);
+                    ds.writeLong(singleCharList[ci]*divisor);
                 }
             }
         } catch (IOException ioex) {
@@ -76,13 +83,13 @@ public class MetricDataIndependentChar implements Metric<String> {
         }
     }
 
-    public long metric(String s) {
+    public int metric(String s) {
         if (s == null || s.isEmpty()) {
-            return 0L;
+            return 0;
         }
         boolean charsLeft = true;
         int l = s.length();
-        long result = 0L;
+        int result = 0;
         boolean done = false;
         for (int i = 0; i < depth; i++) {
             result *= factor;

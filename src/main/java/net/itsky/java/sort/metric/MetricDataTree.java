@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.SortedMap;
 
 public class MetricDataTree implements Metric<String> {
-    private final SortedMap<String, Long> map;
+    private final SortedMap<String, Integer> map;
 
     private static final Comparator<String> reverseOrder = Comparator.reverseOrder();
 
@@ -16,7 +16,7 @@ public class MetricDataTree implements Metric<String> {
         map = new TreeSortedMap<>(reverseOrder);
     }
 
-    public MetricDataTree(SortedMap<String, Long> map) {
+    public MetricDataTree(SortedMap<String, Integer> map) {
         this.map = map;
     }
 
@@ -26,7 +26,7 @@ public class MetricDataTree implements Metric<String> {
                 while (true) {
                     try {
                         String key = ds.readUTF();
-                        long val = ds.readLong();
+                        int val = (int) (ds.readLong() >> 32);
                         map.put(key, val);
                     } catch (EOFException eof) {
                         break;
@@ -42,9 +42,9 @@ public class MetricDataTree implements Metric<String> {
     public void write(OutputStream stream) {
         try (BufferedOutputStream bs = new BufferedOutputStream(stream)) {
             try (DataOutputStream ds = new DataOutputStream(bs)) {
-                for (SortedMap.Entry<String, Long> entry : map.entrySet()) {
+                for (SortedMap.Entry<String, Integer> entry : map.entrySet()) {
                     ds.writeUTF(entry.getKey());
-                    ds.writeLong(entry.getValue());
+                    ds.writeLong(((long)entry.getValue()) << 32);
                 }
             }
         } catch (IOException ioex) {
@@ -53,13 +53,13 @@ public class MetricDataTree implements Metric<String> {
         }
     }
 
-    public long metric(String s) {
+    public int metric(String s) {
         if (s == null) {
-            return 0L;
+            return 0;
         }
-        SortedMap<String, Long> tailMap = map.tailMap(s);
+        SortedMap<String, Integer> tailMap = map.tailMap(s);
         if (tailMap.isEmpty()) {
-            return 0L;
+            return 0;
         }
         return tailMap.firstEntry().getValue();
     }

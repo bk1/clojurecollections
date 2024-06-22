@@ -25,8 +25,8 @@ public class MetricDataCyrForest implements Metric<String> {
     private static final int ABOVE = 0x500;
 
 
-    public record LocalTree(long metricOneChar, long metricBetween, long metricAbove, List<LocalTree> latBlock, List<LocalTree> cyrBlock) {
-        public long metric(String s) {
+    public record LocalTree(int metricOneChar, int metricBetween, int metricAbove, List<LocalTree> latBlock, List<LocalTree> cyrBlock) {
+        public int metric(String s) {
             if (s.isEmpty() || latBlock == null && cyrBlock == null) {
                 return metricOneChar;
             }
@@ -52,13 +52,13 @@ public class MetricDataCyrForest implements Metric<String> {
     public void read(InputStream stream) {
         System.out.println("reading");
         list.clear();
-        SortedMap<String, Long> map = new TreeSortedMap<>(reverseOrder);
+        SortedMap<String, Integer> map = new TreeSortedMap<>(reverseOrder);
         try (BufferedInputStream bs = new BufferedInputStream(stream)) {
             try (DataInputStream ds = new DataInputStream(bs)) {
                 while (true) {
                     try {
                         String key = ds.readUTF();
-                        long val = ds.readLong();
+                        int val = (int) (ds.readLong() >> 32);
                         map.put(key, val);
                     } catch (EOFException eof) {
                         break;
@@ -71,9 +71,9 @@ public class MetricDataCyrForest implements Metric<String> {
         }
         for (int ci = 0; ci < LIST_SIZE; ci++) {
             String key = String.valueOf((char) ci);
-            long metric = getMetric(map, key);
-            long metricBetween = getMetric(map, key+(char) BETWEEN);
-            long metricAbove = getMetric(map, key+(char)ABOVE);
+            int metric = getMetric(map, key);
+            int metricBetween = getMetric(map, key+(char) BETWEEN);
+            int metricAbove = getMetric(map, key+(char)ABOVE);
             final LocalTree localTree;
             if (ci <= LAT_BLOCK_UPPER || CYR_BLOCK_LOWER <= ci  && ci < CYR_BLOCK_UPPER || ci == 0x2014) {
                 List<LocalTree> latBlock = IntStream.range(LAT_BLOCK_LOWER, LAT_BLOCK_UPPER)
@@ -103,7 +103,7 @@ public class MetricDataCyrForest implements Metric<String> {
                     String s1 = String.valueOf((char) ci);
                     LocalTree localTree = list.get(ci);
                     ds.writeUTF(s1);
-                    ds.writeLong(localTree.metricOneChar);
+                    ds.writeLong(((long)localTree.metricOneChar)<< 32);
                     IntStream.concat(IntStream.range(LAT_BLOCK_LOWER, LAT_BLOCK_UPPER+1), IntStream.range(CYR_BLOCK_LOWER-1, CYR_BLOCK_UPPER+1))
                             .forEach(cj -> {
                                 String s2 = String.valueOf((char) cj);
@@ -111,7 +111,7 @@ public class MetricDataCyrForest implements Metric<String> {
                                 long metric = localTree.metric(s2);
                                 try {
                                     ds.writeUTF(s);
-                                    ds.writeLong(metric);
+                                    ds.writeLong(((long)metric) << 32);
                                 } catch (IOException ioex) {
                                     throw new UncheckedIOException(ioex);
                                 }
@@ -125,18 +125,18 @@ public class MetricDataCyrForest implements Metric<String> {
         System.out.println("written");
     }
 
-    private static long getMetric(SortedMap<String, Long> map, String key) {
-        SortedMap<String, Long> tailMap = map.tailMap(key);
+    private static int getMetric(SortedMap<String, Integer> map, String key) {
+        SortedMap<String, Integer> tailMap = map.tailMap(key);
         if (tailMap.isEmpty()) {
-            return 0L;
+            return 0;
         } else {
             return tailMap.firstEntry().getValue();
         }
     }
 
-    public long metric(String s) {
+    public int metric(String s) {
         if (s == null|| s.isEmpty()) {
-            return 0L;
+            return 0;
         }
         int ci = s.charAt(0);
         String t = s.substring(1);

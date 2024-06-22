@@ -4,11 +4,11 @@ import net.itsky.java.sort.Metric;
 
 public class Cyrillic2BlockStringMetric implements Metric<String> {
 
-    public long metric(String s) {
+    public int metric(String s) {
         int n = s.length();
-        long result =  0;
+        int result =  0;
         boolean rareFound = false;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 3; i++) {
             result *=0x0204;
             if (i < n && ! rareFound) {
                 int c = s.charAt(i);
@@ -18,7 +18,7 @@ public class Cyrillic2BlockStringMetric implements Metric<String> {
                     c = 0x0101;
                     rareFound = true;
                 } else if (c < 0x0500) {
-                    c = c - 0x02fe;
+                    c -= 0x02fe;
                 } else {
                     c = 0x0203;
                     rareFound = true;

@@ -1,6 +1,7 @@
 package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.Metric;
+import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.map.primitive.MutableIntLongMap;
 import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
@@ -18,22 +19,22 @@ import java.util.SortedMap;
 public class MetricDataOneChar implements Metric<String> {
     public static final int ARR_SIZE = Character.MAX_VALUE + 1;
 
-    private final long[] singleCharList;
+    private final int[] singleCharList;
 
     public MetricDataOneChar() {
-        singleCharList = new long[ARR_SIZE];
+        singleCharList = new int[ARR_SIZE];
     }
 
-    public MetricDataOneChar(long[] singleCharList) {
+    public MetricDataOneChar(int[] singleCharList) {
         this.singleCharList = singleCharList;
     }
 
-    public MetricDataOneChar(LongList singleCharList) {
+    public MetricDataOneChar(IntList singleCharList) {
         this.singleCharList = singleCharList.toArray();
     }
 
-    public MetricDataOneChar(List<Long> singleCharList) {
-        this.singleCharList = singleCharList.stream().mapToLong(Long::longValue).toArray();
+    public MetricDataOneChar(List<Integer> singleCharList) {
+        this.singleCharList = singleCharList.stream().mapToInt(Integer::intValue).toArray();
     }
 
     public void read(InputStream stream) {
@@ -42,7 +43,7 @@ public class MetricDataOneChar implements Metric<String> {
                 int ci = 0;
                 while (true) {
                     try {
-                        long val = ds.readLong();
+                        int val = (int)(ds.readLong() >> 32);
                         singleCharList[ci++] = val;
                         if (ci >= ARR_SIZE) {
                             break;
@@ -64,7 +65,7 @@ public class MetricDataOneChar implements Metric<String> {
         try (BufferedOutputStream bs = new BufferedOutputStream(stream)) {
             try (DataOutputStream ds = new DataOutputStream(bs)) {
                 for (int ci = 0; ci < ARR_SIZE; ci++) {
-                    ds.writeLong(singleCharList[ci]);
+                    ds.writeLong(((long)singleCharList[ci]) <<32);
                 }
             }
         } catch (IOException ioex) {
@@ -73,9 +74,9 @@ public class MetricDataOneChar implements Metric<String> {
         }
     }
 
-    public long metric(String s) {
+    public int metric(String s) {
         if (s == null || s.isEmpty()) {
-            return 0L;
+            return 0;
         }
         char c = s.charAt(0);
         return singleCharList[c];

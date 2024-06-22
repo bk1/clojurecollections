@@ -25,8 +25,8 @@ public class MetricDataCyrArrForest implements Metric<String> {
     private static final int ABOVE = 0x500;
 
 
-    public record LocalTree(long metricOneChar, long metricBetween, long metricAbove, LocalTree[] latBlock, LocalTree[] cyrBlock) {
-        public long metric(String s) {
+    public record LocalTree(int metricOneChar, int metricBetween, int metricAbove, LocalTree[] latBlock, LocalTree[] cyrBlock) {
+        public int metric(String s) {
             if (s.isEmpty() || latBlock == null && cyrBlock == null) {
                 return metricOneChar;
             }
@@ -51,13 +51,13 @@ public class MetricDataCyrArrForest implements Metric<String> {
 
     public void read(InputStream stream) {
         System.out.println("reading");
-        SortedMap<String, Long> map = new TreeSortedMap<>(reverseOrder);
+        SortedMap<String, Integer> map = new TreeSortedMap<>(reverseOrder);
         try (BufferedInputStream bs = new BufferedInputStream(stream)) {
             try (DataInputStream ds = new DataInputStream(bs)) {
                 while (true) {
                     try {
                         String key = ds.readUTF();
-                        long val = ds.readLong();
+                        int val = (int) (ds.readLong() >> 32);
                         map.put(key, val);
                     } catch (EOFException eof) {
                         break;
@@ -70,9 +70,9 @@ public class MetricDataCyrArrForest implements Metric<String> {
         }
         for (int ci = 0; ci < LIST_SIZE; ci++) {
             String key = String.valueOf((char) ci);
-            long metric = getMetric(map, key);
-            long metricBetween = getMetric(map, key+String.valueOf((char) BETWEEN));
-            long metricAbove = getMetric(map, key+String.valueOf((char)ABOVE));
+            int metric = getMetric(map, key);
+            int metricBetween = getMetric(map, key+String.valueOf((char) BETWEEN));
+            int metricAbove = getMetric(map, key+String.valueOf((char)ABOVE));
             final LocalTree localTree;
             if (ci <= LAT_BLOCK_UPPER || CYR_BLOCK_LOWER <= ci  && ci < CYR_BLOCK_UPPER) {
                 LocalTree[] latBlock = IntStream.range(LAT_BLOCK_LOWER, LAT_BLOCK_UPPER)
@@ -124,18 +124,18 @@ public class MetricDataCyrArrForest implements Metric<String> {
         System.out.println("written");
     }
 
-    private static long getMetric(SortedMap<String, Long> map, String key) {
-        SortedMap<String, Long> tailMap = map.tailMap(key);
+    private static int getMetric(SortedMap<String, Integer> map, String key) {
+        SortedMap<String, Integer> tailMap = map.tailMap(key);
         if (tailMap.isEmpty()) {
-            return 0L;
+            return 0;
         } else {
             return tailMap.firstEntry().getValue();
         }
     }
 
-    public long metric(String s) {
+    public int metric(String s) {
         if (s == null|| s.isEmpty()) {
-            return 0L;
+            return 0;
         }
         int ci = s.charAt(0);
         String t = s.substring(1);

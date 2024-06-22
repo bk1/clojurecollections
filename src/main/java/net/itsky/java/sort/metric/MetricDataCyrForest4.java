@@ -31,8 +31,8 @@ public class MetricDataCyrForest4 implements Metric<String> {
     private static final int ABOVE = 0x500;
 
 
-    public record LocalTree(long metricOneChar, long metricBetween, long metricAbove, List<LocalTree> latBlock, List<LocalTree> cyrBlock) {
-        public long metric(String s) {
+    public record LocalTree(int metricOneChar, int metricBetween, int metricAbove, List<LocalTree> latBlock, List<LocalTree> cyrBlock) {
+        public int metric(String s) {
             if (s.isEmpty() || latBlock == null && cyrBlock == null) {
                 return metricOneChar;
             }
@@ -57,13 +57,13 @@ public class MetricDataCyrForest4 implements Metric<String> {
 
     public void read(InputStream metricStream, InputStream frequenciesStream) {
         System.out.println("reading");
-        SortedMap<String, Long> map = new TreeSortedMap<>(reverseOrder);
+        SortedMap<String, Integer> map = new TreeSortedMap<>(reverseOrder);
         try (BufferedInputStream bs = new BufferedInputStream(metricStream)) {
             try (DataInputStream ds = new DataInputStream(bs)) {
                 while (true) {
                     try {
                         String key = ds.readUTF().intern();
-                        long val = ds.readLong();
+                        int val = (int)(ds.readLong() >> 32);
                         map.put(key, val);
                     } catch (EOFException eof) {
                         break;
@@ -103,9 +103,9 @@ public class MetricDataCyrForest4 implements Metric<String> {
         }
         for (int ci = 0; ci < LIST_SIZE; ci++) {
             String key = String.valueOf((char) ci);
-            long metric = getMetric(map, key);
-            long metricBetween = getMetric(map, key+String.valueOf((char) BETWEEN));
-            long metricAbove = getMetric(map, key+String.valueOf((char)ABOVE));
+            int metric = getMetric(map, key);
+            int metricBetween = getMetric(map, key+String.valueOf((char) BETWEEN));
+            int metricAbove = getMetric(map, key+String.valueOf((char)ABOVE));
             final LocalTree localTree;
             /*
 MIN_FREQ=1:
@@ -140,24 +140,24 @@ key.length=5 count=0 sum=0
         System.out.println("read");
     }
 
-    private List<LocalTree> createLatBlock(String parentKey, SortedMap<String, Long> map, ObjectLongMap<String> frequencyMap, int remainingDepth) {
+    private List<LocalTree> createLatBlock(String parentKey, SortedMap<String, Integer> map, ObjectLongMap<String> frequencyMap, int remainingDepth) {
         return createBlock(parentKey, map, frequencyMap, remainingDepth, LAT_BLOCK_LOWER, LAT_BLOCK_UPPER);
     }
 
-    private List<LocalTree> createCyrBlock(String parentKey, SortedMap<String, Long> map, ObjectLongMap<String> frequencyMap, int remainingDepth) {
+    private List<LocalTree> createCyrBlock(String parentKey, SortedMap<String, Integer> map, ObjectLongMap<String> frequencyMap, int remainingDepth) {
         return createBlock(parentKey, map, frequencyMap, remainingDepth, CYR_BLOCK_LOWER, CYR_BLOCK_UPPER);
     }
 
-    private List<LocalTree> createBlock(String parentKey, SortedMap<String, Long> map, ObjectLongMap<String> frequencyMap, int remainingDepth, int blockLower, int blockUpper) {
+    private List<LocalTree> createBlock(String parentKey, SortedMap<String, Integer> map, ObjectLongMap<String> frequencyMap, int remainingDepth, int blockLower, int blockUpper) {
         List<LocalTree> result = new ArrayList<>(blockUpper - blockLower);
         for (int i = blockLower; i < blockUpper; i++) {
             String key = parentKey + (char) i;
-            long metric = getMetric(map, key);
+            int metric = getMetric(map, key);
             if (remainingDepth <= 0 || frequencyMap.getIfAbsent(key, 0) < MIN_FREQUENCY) {
                 result.add(new LocalTree(metric, metric, metric, null, null));
             } else {
-                long metricBetween = getMetric(map, key + (char) BETWEEN);
-                long metricAbove = getMetric(map, key + (char) ABOVE);
+                int metricBetween = getMetric(map, key + (char) BETWEEN);
+                int metricAbove = getMetric(map, key + (char) ABOVE);
                 result.add(new LocalTree(metric, metricBetween, metricAbove,
                         createLatBlock(key, map, frequencyMap, remainingDepth -1),
                         createCyrBlock(key, map, frequencyMap, remainingDepth -1)));
@@ -197,18 +197,18 @@ key.length=5 count=0 sum=0
         System.out.println("written");
     }
 
-    private static long getMetric(SortedMap<String, Long> map, String key) {
-        SortedMap<String, Long> tailMap = map.tailMap(key);
+    private static int getMetric(SortedMap<String, Integer> map, String key) {
+        SortedMap<String, Integer> tailMap = map.tailMap(key);
         if (tailMap.isEmpty()) {
-            return Long.MIN_VALUE;
+            return 0;
         } else {
             return tailMap.firstEntry().getValue();
         }
     }
 
-    public long metric(String s) {
+    public int metric(String s) {
         if (s == null|| s.isEmpty()) {
-            return 0L;
+            return 0;
         }
         int ci = s.charAt(0);
         String t = s.substring(1);

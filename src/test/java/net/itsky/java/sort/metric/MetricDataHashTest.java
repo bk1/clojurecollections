@@ -1,8 +1,11 @@
 package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.metric.MetricDataHash;
+import org.eclipse.collections.api.factory.map.primitive.MutableObjectIntMapFactory;
 import org.eclipse.collections.api.factory.map.primitive.MutableObjectLongMapFactory;
+import org.eclipse.collections.api.map.primitive.MutableObjectIntMap;
 import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
+import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectIntMapFactoryImpl;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectLongMapFactoryImpl;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -20,11 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Disabled
 public class MetricDataHashTest {
 
-    private static final MutableObjectLongMapFactory mapFactory = new MutableObjectLongMapFactoryImpl();
+    private static final MutableObjectIntMapFactory mapFactory = new MutableObjectIntMapFactoryImpl();
 
     @Test
     void testWriteAndRead() throws IOException, InterruptedException {
-        MutableObjectLongMap<String> map = mapFactory.of("A", 1, "B", 2, "C", 3, "D", 4);
+        MutableObjectIntMap<String> map = mapFactory.of("A", 1, "B", 2, "C", 3, "D", 4);
         MetricDataHash source = new MetricDataHash(map);
         MetricDataHash target = new MetricDataHash();
         PipedInputStream inputStream = new PipedInputStream();

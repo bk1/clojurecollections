@@ -24,7 +24,7 @@ public class MetricDataTreeTest {
 
     @Test
     void testWriteAndRead() throws IOException, InterruptedException {
-        TreeSortedMap<String, Long> map = new TreeSortedMap<>(Map.of("A", 1L, "B", 2L, "C", 3L, "D", 4L));
+        TreeSortedMap<String, Integer> map = new TreeSortedMap<>(Map.of("A", 1, "B", 2, "C", 3, "D", 4));
         MetricDataTree source = new MetricDataTree(map);
         MetricDataTree target = new MetricDataTree();
         PipedInputStream inputStream = new PipedInputStream();

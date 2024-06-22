@@ -4,5 +4,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface Metric<T> {
-    long metric(T element);
+    int metric(T element);
 }

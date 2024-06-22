@@ -14,8 +14,8 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
     private static final double DEFAULT_FACTOR = 0.42;
     private static final int DEFAULT_LIMIT = 10000;
 
-    private static final long HALF_MIN_VALUE = Long.MIN_VALUE>>1;
-    private static final long HALF_MAX_VALUE = Long.MAX_VALUE>>1;
+    private static final int HALF_MIN_VALUE = Integer.MIN_VALUE>>1;
+    private static final int HALF_MAX_VALUE = Integer.MAX_VALUE>>1;
 
     private double factor = DEFAULT_FACTOR;
     private int limit = DEFAULT_LIMIT;
@@ -58,12 +58,12 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
         int[] l = new int[lSize];
         int maxIdx = begin;
         long t0 = currentTimeMillis();
-        long mMin = metric.metric(list.get(begin));
+        int mMin = metric.metric(list.get(begin));
         tm += currentTimeMillis()-t0;
-        long mMax = mMin;
+        int mMax = mMin;
         for (int i = begin; i < end; i++) {
             t0 = currentTimeMillis();
-            long mi = metric.metric(list.get(i));
+            int mi = metric.metric(list.get(i));
             tm += currentTimeMillis()-t0;
             if (mi < mMin) {
                 mMin = mi;
@@ -85,7 +85,7 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
         // count the elements in each of the lSize classes
         for (int i = begin; i < end; i++) {
             t0 = currentTimeMillis();
-            long metricAtI = metric.metric(list.get(i));
+            int metricAtI = metric.metric(list.get(i));
             tm += currentTimeMillis() - t0;
             int k = fsortCalculateK(metricAtI - mMin, step, lSize);
             l[k]++;
@@ -112,14 +112,14 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
             while (j >= l[k]) {
                 j++;
                 t0= currentTimeMillis();
-                long metricAtJ = metric.metric(list.get(j));
+                int metricAtJ = metric.metric(list.get(j));
                 tm += currentTimeMillis()-t0;
                 k = fsortCalculateK(metricAtJ - mMin, step, lSize);
             }
             /* now: j < l[k] */
             while (j != l[k]) {
                 t0= currentTimeMillis();
-                long metricAtJ = metric.metric(list.get(j));
+                int metricAtJ = metric.metric(list.get(j));
                 tm += currentTimeMillis()-t0;
                 k = fsortCalculateK(metricAtJ - mMin, step, lSize);
                 int idx = l[k] - 1;
@@ -166,8 +166,8 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
             if (classSize > 100000 && sortWholeList) {
                 T classMin = list.get(lower);
                 T classMax = list.get(upper-1);
-                long mmin = metric.metric(classMin);
-                long mmax = metric.metric(classMax);
+                int mmin = metric.metric(classMin);
+                int mmax = metric.metric(classMax);
                 int kmin = fsortCalculateK(mmin - mMin, step, lSize);
                 int kmax = fsortCalculateK(mmax - mMin, step, lSize);
                 double delta = (mmax - mmin) * step;
@@ -193,7 +193,7 @@ public class FlashSort<T, L extends List<T>> implements SortMetricized<T, L> {
         return list;
     }
 
-    private int fsortCalculateK(long metricValue, double factor, int n) {
+    private int fsortCalculateK(int metricValue, double factor, int n) {
         // calculate prod as factor*value, add a small delta for rounding, force it into the closed interval [0,n-1]
         int result = (int) (factor * metricValue + 1e-9);
         if (result < 0) {

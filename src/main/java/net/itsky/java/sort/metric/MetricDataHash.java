@@ -1,8 +1,10 @@
 package net.itsky.java.sort.metric;
 
 import net.itsky.java.sort.Metric;
+import org.eclipse.collections.api.map.primitive.MutableObjectIntMap;
 import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
 import org.eclipse.collections.api.map.sorted.MutableSortedMap;
+import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectIntMapFactoryImpl;
 import org.eclipse.collections.impl.map.mutable.primitive.MutableObjectLongMapFactoryImpl;
 import org.eclipse.collections.impl.map.sorted.mutable.TreeSortedMap;
 
@@ -13,26 +15,26 @@ import java.util.SortedMap;
 
 public class MetricDataHash implements Metric<String> {
     private static final int MAX_SUB_WORD_LENGTH = 10;
-    private final MutableObjectLongMap<String> map;
+    private final MutableObjectIntMap<String> map;
 
     private static final Comparator<String> reverseOrder = Comparator.reverseOrder();
 
     public MetricDataHash() {
-        map = new MutableObjectLongMapFactoryImpl().empty();
+        map = new MutableObjectIntMapFactoryImpl().empty();
     }
 
-    public MetricDataHash(MutableObjectLongMap<String> map) {
+    public MetricDataHash(MutableObjectIntMap<String> map) {
         this.map = map;
     }
 
     public void read(InputStream stream) {
-        MutableSortedMap<String, Long> sortedMap = new TreeSortedMap<>(reverseOrder);
+        MutableSortedMap<String, Integer> sortedMap = new TreeSortedMap<>(reverseOrder);
         try (BufferedInputStream bs = new BufferedInputStream(stream)) {
             try (DataInputStream ds = new DataInputStream(bs)) {
                 while (true) {
                     try {
                         String key = ds.readUTF();
-                        long val = ds.readLong();
+                        int val = (int) (ds.readLong() >> 32);
                         map.put(key, val);
                         sortedMap.put(key, val);
                     } catch (EOFException eof) {
@@ -48,10 +50,10 @@ public class MetricDataHash implements Metric<String> {
         for (int ci = 0; ci <= Character.MAX_VALUE; ci++) {
             String cs = String.valueOf((char) ci);
             if (! map.containsKey(cs)) {
-                final long val;
-                SortedMap<String, Long> tailMap = sortedMap.tailMap(cs);
+                final int val;
+                SortedMap<String, Integer> tailMap = sortedMap.tailMap(cs);
                 if (tailMap.isEmpty()) {
-                    val = 0L;
+                    val = 0;
                 } else {
                     val = tailMap.firstEntry().getValue();
                 }
@@ -74,9 +76,9 @@ public class MetricDataHash implements Metric<String> {
         }
     }
 
-    public long metric(String s) {
+    public int metric(String s) {
         if (s == null || s.isEmpty()) {
-            return 0L;
+            return 0;
         }
         int n = Math.min(s.length(), MAX_SUB_WORD_LENGTH);
         for (int i = n; i > 0; i--) {
@@ -85,6 +87,6 @@ public class MetricDataHash implements Metric<String> {
                 return map.get(key);
             }
         }
-        return 0L;
+        return 0;
     }
 }

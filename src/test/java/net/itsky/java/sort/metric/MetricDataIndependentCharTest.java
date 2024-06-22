@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MetricDataIndependentCharTest {
 
+    private static final long MAX_INT_PRIME = 2147483647L;
+
     private MetricDataIndependentChar[] metrics
             = IntStream.rangeClosed(1, 10)
     .mapToObj(this::readUkrainianMetric).toArray(MetricDataIndependentChar[]::new);
@@ -26,9 +28,9 @@ public class MetricDataIndependentCharTest {
     @Test
     void testWriteAndRead() throws IOException, InterruptedException {
         for (int i = 1; i <= 10; i++) {
-            long[] arr = LongStream.range(0, ARR_SIZE + 1).map(x -> {
+            int[] arr = LongStream.range(0, ARR_SIZE + 1).mapToInt(x -> {
                 long xx = x - 32768;
-                return xx * xx * xx - xx * xx + xx - 1;
+                return (int) Math.abs((xx * xx * xx - xx * xx + xx - 1) % MAX_INT_PRIME);
             }).toArray();
             MetricDataIndependentChar source = new MetricDataIndependentChar(i, arr);
             MetricDataIndependentChar target = new MetricDataIndependentChar(i);

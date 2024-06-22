@@ -78,7 +78,7 @@ public class TestUtils {
             data = data.subList(0, 2000);
         }
         for (String x: data) {
-            long mx = metric.metric(x);
+            int mx = metric.metric(x);
             assertTrue(mx >= 0L, () -> "x=" + x + " mx=" + mx);
             for (String y:data) {
                 if (x.equals(y)) {
@@ -87,9 +87,9 @@ public class TestUtils {
                 long my = metric.metric(y);
                 String msg = "x=" + x + " y=" + y + " mx=" + mx + " my=" + my;
                 if (mx < my) {
-                    assertTrue(x.compareTo(y) < 0, msg);
+                  assertTrue(x.compareTo(y) < 0, msg);
                 } else if (mx > my) {
-                    assertTrue(x.compareTo(y) > 0, msg);
+                  assertTrue(x.compareTo(y) > 0, msg);
                 }
                 if (x.equals(y)) {
                     assertEquals(mx, my, msg);

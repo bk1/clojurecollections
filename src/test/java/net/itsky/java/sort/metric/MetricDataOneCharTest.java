@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static net.itsky.java.sort.TestUtils.checkMinMaxPairs;
@@ -19,7 +20,7 @@ public class MetricDataOneCharTest {
 
     @Test
     void testWriteAndRead() throws IOException, InterruptedException {
-        long[] arr = LongStream.range(0, ARR_SIZE).map(x-> {long xx = x - 32768;return xx*xx*xx - xx*xx + xx - 1;}).toArray();
+        int[] arr = IntStream.range(0, ARR_SIZE).map(x-> {int xx = x - 32768;return xx*xx*xx - xx*xx + xx - 1;}).toArray();
         MetricDataOneChar source = new MetricDataOneChar(arr);
         MetricDataOneChar target = new MetricDataOneChar();
         try (PipedInputStream inputStream = new PipedInputStream()) {

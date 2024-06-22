@@ -4,11 +4,11 @@ import net.itsky.java.sort.Metric;
 
 public class CyrillicStringMetric implements Metric<String> {
 
-    public long metric(String s) {
+    public int metric(String s) {
         int n = s.length();
-        long result =  0;
+        int result =  0;
         boolean upperFound = false;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 3; i++) {
             result *=0x0502;
             if (i < n && ! upperFound) {
                 int c = s.charAt(i);
